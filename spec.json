@@ -1,0 +1,1132 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API Spec",
+    "description": "RESTful JSON API",
+    "termsOfService": "",
+    "contact": {
+      "email": "test@example.com"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "http://localhost:5555/license"
+    }
+  },
+  "host": "localhost:5555",
+  "basePath": "",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "definitions": {
+    "error_unit": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "The error code"
+        },
+        "message": {
+          "type": "string",
+          "description": "The error description"
+        },
+        "field": {
+          "type": "string",
+          "description": "The erroneous data field (if any)"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ]
+    },
+    "error_response": {
+      "type": "object",
+      "description": "Error response",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref":"#/definitions/error_unit"
+          }
+        },
+        "meta": {
+          "type": "object",
+          "description": "Optional arbitrary meta data (key/value pairs)",
+          "readOnly": true,
+          "additionalProperties": true
+        },
+        "request_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique UUID for each request"
+        }
+      },
+      "required": [
+        "errors",
+        "request_id"
+      ]
+    },
+    "authentication": {
+      "type": "object",
+      "description": "Authentication response payload",
+      "properties": {
+        "data": {
+          "$ref":"#/definitions/auth"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Optional arbitrary meta data (key/value pairs)",
+          "readOnly": true,
+          "additionalProperties": true
+        },
+        "request_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique UUID for each request"
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "categories_detail": {
+      "type": "object",
+      "description": "Category details response payload",
+      "properties": {
+        "data": {
+          "$ref":"#/definitions/categories"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Optional arbitrary meta data (key/value pairs)",
+          "readOnly": true,
+          "additionalProperties": true
+        },
+        "request_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique UUID for each request"
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "categories_list": {
+      "type": "object",
+      "description": "Categories list response payload",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Categories list",
+          "items": {
+            "$ref":"#/definitions/categories"
+          }
+        },
+        "meta": {
+          "type": "object",
+          "description": "Optional arbitrary meta data (key/value pairs)",
+          "readOnly": true,
+          "additionalProperties": true
+        },
+        "request_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique UUID for each request"
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "auth": {
+      "type": "object",
+      "description": "Auth token",
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Short lived JWT Token"
+        },
+        "refresh_token": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Refresh token to delegate new access_token"
+        },
+        "token_type": {
+          "type": "string",
+          "readOnly": true,
+          "enum": [
+            "Bearer"
+          ]
+        },
+        "grant_type": {
+          "type": "string",
+          "readOnly": true,
+          "enum": [
+            "password",
+            "auth_key",
+            "refresh_token"
+          ]
+        },
+        "expires_in": {
+          "type": "integer",
+          "readOnly": true,
+          "description": "Number of seconds after which access_token expires"
+        }
+      }
+    },
+    "categories": {
+      "type": "object",
+      "description": "Category details",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "readOnly": true,
+          "description": "Primary identifier"
+        },
+        "image": {
+          "type": "string",
+          "description": "The category image URI"
+        },
+        "last_modified": {
+          "type": "string",
+          "description": "Last modified date time with timezone"
+        }
+      }
+    },
+    "products": {
+      "type": "object",
+      "description": "Product details",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "readOnly": true,
+          "description": "Primary identifier"
+        },
+        "model": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Product model aka SKU"
+        },
+        "current_popularity": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Product popularity in a range of 0 - 10"
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Product marked price"
+        }
+      }
+    },
+    "zones": {
+      "type": "object",
+      "description": "Zone details",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "readOnly": true,
+          "description": "Primary identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of zone"
+        },
+        "code": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique code"
+        },
+        "country_id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Country ID where the zone belongs to"
+        }
+      }
+    },
+    "products_detail": {
+      "type": "object",
+      "description": "Product details response payload",
+      "properties": {
+        "data": {
+          "$ref":"#/definitions/products"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Optional arbitrary meta data (key/value pairs)",
+          "readOnly": true,
+          "additionalProperties": true
+        },
+        "request_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique UUID for each request"
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "products_list": {
+      "type": "object",
+      "description": "Products list response payload",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Products list",
+          "items": {
+            "$ref":"#/definitions/products"
+          }
+        },
+        "meta": {
+          "type": "object",
+          "description": "Optional arbitrary meta data (key/value pairs)",
+          "readOnly": true,
+          "additionalProperties": true
+        },
+        "request_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique UUID for each request"
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "zones_detail": {
+      "type": "object",
+      "description": "Zone details response payload",
+      "properties": {
+        "data": {
+          "$ref":"#/definitions/zones"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Optional arbitrary meta data (key/value pairs)",
+          "readOnly": true,
+          "additionalProperties": true
+        },
+        "request_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique UUID for each request"
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "zones_list": {
+      "type": "object",
+      "description": "Zones list response payload",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Zones list",
+          "items": {
+            "$ref":"#/definitions/zones"
+          }
+        },
+        "meta": {
+          "type": "object",
+          "description": "Optional arbitrary meta data (key/value pairs)",
+          "readOnly": true,
+          "additionalProperties": true
+        },
+        "request_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Unique UUID for each request"
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    }
+  },
+  "paths": {
+    "/auth": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "authentication",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Authentication response payload",
+        "responses": {
+          "200": {
+            "description": "Authentication response payload",
+            "schema": {
+              "$ref":"#/definitions/authentication"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "basic": []
+          }
+        ]
+      }
+    },
+    "/auth/delegation": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "delegation",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Authentication response payload",
+        "responses": {
+          "200": {
+            "description": "Authentication response payload",
+            "schema": {
+              "$ref":"#/definitions/authentication"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "422": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string",
+            "description": "Refresh token",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/banks/{code}": {
+      "get": {
+        "tags": [
+          "banks"
+        ],
+        "operationId": "get-bank-name",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Success response",
+        "responses": {
+          "204": {
+            "description": "Success response with no data"
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "403": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "422": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "type": "string",
+            "description": "Code of banks",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearer": [
+              "user"
+            ]
+          }
+        ]
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "operationId": "categories-list",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Categories list response payload",
+        "responses": {
+          "200": {
+            "description": "Categories list response payload",
+            "schema": {
+              "$ref":"#/definitions/categories_list"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/categories/{id}": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "operationId": "categories-detail",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Category details response payload",
+        "responses": {
+          "200": {
+            "description": "Category details response payload",
+            "schema": {
+              "$ref":"#/definitions/categories_detail"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "422": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of categories",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "operationId": "products-list",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Products list response payload",
+        "responses": {
+          "200": {
+            "description": "Products list response payload",
+            "schema": {
+              "$ref":"#/definitions/products_list"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "403": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "bearer": [
+              "user"
+            ]
+          }
+        ]
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "operationId": "products-detail",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Product details response payload",
+        "responses": {
+          "200": {
+            "description": "Product details response payload",
+            "schema": {
+              "$ref":"#/definitions/products_detail"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "403": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "422": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string",
+            "description": "Search for products",
+            "required": true
+          }
+
+        ],
+        "security": [
+          {
+            "bearer": [
+              "user"
+            ]
+          }
+        ]
+      }
+    },
+    "/zones": {
+      "get": {
+        "tags": [
+          "zones"
+        ],
+        "operationId": "zones-list",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Zones list response payload",
+        "responses": {
+          "200": {
+            "description": "Zones list response payload",
+            "schema": {
+              "$ref":"#/definitions/zones_list"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": []
+      },
+      "post": {
+        "tags": [
+          "zones"
+        ],
+        "operationId": "zones-create",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Zone details response payload",
+        "responses": {
+          "200": {
+            "description": "Zone details response payload",
+            "schema": {
+              "$ref":"#/definitions/zones_detail"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "403": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "422": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref":"#/definitions/zones"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearer": [
+              "user"
+            ]
+          }
+        ]
+      }
+    },
+    "/zones/{id}": {
+      "get": {
+        "tags": [
+          "zones"
+        ],
+        "operationId": "zones-detail",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Zone details response payload",
+        "responses": {
+          "200": {
+            "description": "Zone details response payload",
+            "schema": {
+              "$ref":"#/definitions/zones_detail"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "422": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of zones",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "zones"
+        ],
+        "operationId": "zones-update",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Zone details response payload",
+        "responses": {
+          "200": {
+            "description": "Zone details response payload",
+            "schema": {
+              "$ref":"#/definitions/zones_detail"
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "422": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of zones",
+            "required": true
+          },
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref":"#/definitions/zones"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "zones"
+        ],
+        "operationId": "zones-delete",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "",
+        "description": "Success response",
+        "responses": {
+          "204": {
+            "description": "Success response with no data"
+          },
+          "400": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "500": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          },
+          "422": {
+            "description": "Error response",
+            "schema": {
+              "$ref":"#/definitions/error_response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of zones",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "API docs",
+    "url": "http://localhost:5555/docs.html"
+  },
+  "securityDefinitions": {
+    "bearer": {
+      "type": "oauth2",
+      "in": "header",
+      "name": "Authorization",
+      "authorizationUrl": "http://localhost:5555/auth",
+      "tokenUrl": "http://localhost:5555/auth/delegation",
+      "flow": "password",
+      "scopes": {
+        "user": "user level access",
+        "guest": "public access",
+        "admin": "admin level access",
+        "merchant": "merchant access",
+        "superadmin": "unrestricted access",
+        "configuration": "manage global configuration values",
+        "modules": "manage modules",
+        "countries": "manage countries",
+        "currencies": "manage currencies",
+        "zones": "manage zones",
+        "geo_zones": "manage geozones",
+        "tax_classes": "manage tax clases",
+        "tax_rates": "manage taxrates",
+        "accounting": "manage shop admin rights for users",
+        "languages": "manage languages",
+        "orders_status": "manage orders status (deprictaed)",
+        "shipping_status": "manage shipping status (depricated)",
+        "module_export": "manage xtc modules (deprictaed)",
+        "customers": "manage customers",
+        "create_account": "create customer account",
+        "customers_status": "manage shop user groups (admin, customer, guest, ...)",
+        "orders": "main order overview with options",
+        "campaigns": "create advertising campaign reference Ids",
+        "print_order": "depricated",
+        "popup_memo": "customer memo field",
+        "coupon_admin": "manage special coupons",
+        "bought_coupon_admin": "manage bought coupons",
+        "coupon_themes": "manage coupon themes",
+        "validproducts": "edit valid products in coupon admin",
+        "validcategories": "edit valid coupones in coupon admin",
+        "mail": "send mail to customer via shop (depricated)",
+        "categories": "manage categories (and products)",
+        "specials": "manage specials (product of the day)",
+        "stats_products_purchased": "best selling products the last 30 days",
+        "stats_customers": "new customer accounts stats and maybe other customer stats",
+        "stats_sales_report": "sales statistics",
+        "stats_rma": "rma statistics",
+        "stats_campaigns": "marketing campaigns stats",
+        "start": "startpage after login",
+        "content_manager": "content manager all languages",
+        "content_preview": "preview html for content manager",
+        "credits": "show credits",
+        "orders_edit": "edit orders",
+        "csv_backend": "Article import from Master.xls",
+        "paypal": "manage paypal",
+        "actionshots": "manage customer actionshots",
+        "orders_export": "orders export (for unclear bank cases)",
+        "orders_mass_switch": "mass order status switch (for bankimport)",
+        "orders_allow_export": "Amicron Updateflag setzen",
+        "orders_export_in_euro": "orders export in euro (for statistics)",
+        "email_manager": "Email Templates bearbeiten",
+        "paypal_conflict_check": "Paypal Conflict Check",
+        "docdata_conflict_check": "Docdata Zahlungen von stornierten Bestellungen ",
+        "disable_list": "show disabled products",
+        "email_preview": "Email Manager HTML Vorschau",
+        "collect_new_orders": "Collect all paid orders (AMICRON Feature) depricated",
+        "change_adminrights": "Adminrechte bearbeiten",
+        "send_order": "send copy of order confirmation",
+        "email_known_typos": "manage email known typos",
+        "stats_paymentmethods": "stats paymentmethods",
+        "transfer_check": "zuordnen von nicht autom. zuordbaren Zahlungen",
+        "check_missing_images": "check missing images ",
+        "product_deactivation_wizard": "manual variation deactivation",
+        "new_products_list": "manage new products (for newsletter and new produdts que)",
+        "rma": "Recht f\u00fcr RMA-Bearbeitung",
+        "rma_refund": "Recht R\u00fcckerstattungen auszuf\u00fchren",
+        "stockproducts_list": "customfeld",
+        "not_reachable_by_mail": "R\u00fcckl\u00e4ufer wegen falscher Adresse",
+        "rma_create": "create RMAs for customers",
+        "rma_packets": "finish RMA packet in Ratingen",
+        "rma_replacement_create": "create replacement for orders",
+        "cm_paypal": "search paypal transakctions and refund.",
+        "inpayment": "manage inpayments via bank / docata",
+        "filter_admin": "manage category filters",
+        "missing_variant_translations": "manage missing variant translations",
+        "stats_newsletter": "newsletter statistics",
+        "tiny_url_manager": "manage TinyURLs for shop",
+        "cashpoints_coupons_manager": "manage cp coupons",
+        "stats_feedback_new_shop": "Show Statistics for new responsive design poll",
+        "stats_feedback_survey_newsletter": "Show Statistics for newsletter survey poll",
+        "commissions": "commissions",
+        "bannerrotation": "bannerrotation",
+        "support_set_paid": "support_set_paid",
+        "support_create_refund": "support_create_refund",
+        "support": "support",
+        "newsletter_recipients_export": "Export Newsletter Receipients",
+        "newsletter_links": "access newsletter links",
+        "show_debug_log": "access show debug log",
+        "report_payment_delay": "access report payment delay",
+        "color_tool": "Access Color Tools",
+        "custom_searches": "custom_searches",
+        "eye_catcher": "eye_catcher",
+        "articles": "Access to articles (listing, searching etc)"
+      }
+    },
+    "basic": {
+      "type": "basic"
+    }
+  }
+}

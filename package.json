@@ -1,0 +1,20 @@
+{
+  "name": "tinka-generator-openapi",
+  "version": "1.0.0",
+  "description": "This repo takes a spec file and generate ts-http-client sdk",
+  "main": "index.js",
+  "scripts": {
+    "generate-shop-api": "docker run --rm -t -v ${PWD}:/swagger swaggerapi/swagger-codegen-cli generate -i /swagger/spec.json -l typescript-fetch -o /swagger/sdk/shop-api-client -t /swagger/templates/typescript-fetch/",
+    "generate-shop-api:windows": "docker run --rm -t -v %cd%:/swagger swaggerapi/swagger-codegen-cli generate -i /swagger/spec.json -l typescript-fetch -o /swagger/sdk/shop-api-client -t /swagger/templates/typescript-fetch/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crazyfactory/tinka-generator-openapi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/crazyfactory/tinka-generator-openapi/issues"
+  },
+  "homepage": "https://github.com/crazyfactory/tinka-generator-openapi#readme"
+}

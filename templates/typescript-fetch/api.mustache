@@ -1,0 +1,97 @@
+{{>licenseInfo}}
+
+import {Client, Service, FetchRequest} from "cyberhck-test";
+
+const BASE_PATH = "{{{basePath}}}";
+class AuthMiddleware implements IMiddleware<any, any> {
+  process(options: FetchRequest, next?: (nextOptions: FetchRequest) => any): any {
+    // we check if we have a auth_token
+    // if we do, add it to options
+    options.headers = {...options.headers, Authorization: 'Bearer: something'};
+    // is this auth_token valid (ie not expired?)
+
+    // refresh, we get a new auth_token => save this => continue with the refresh
+    return next(options);
+  }
+}
+
+export class BaseAPI extends Service {
+  constructor() {
+    super(new Client({baseUrl: BASE_PATH}));
+    this.client.addMiddleware(new AuthMiddleware());
+  }
+}
+
+class Helper {
+  public static bakeUrl(raw, params) {
+    Object.keys(params).forEach((key) => {
+      raw.replace("{" + key + "}", params[key])
+    });
+    return raw;
+  }
+}
+
+{{#models}}
+{{#model}}
+{{#description}}
+/**
+ * {{{description}}}
+ */
+{{/description}}
+{{^isEnum}}
+export interface {{classname}} {{#parent}}extends {{{parent}}} {{/parent}}{
+{{/isEnum}}
+{{#isEnum}}
+export type {{{classname}}} = {{#allowableValues}}{{#values}}"{{{.}}}"{{^-last}} | {{/-last}}{{/values}}{{/allowableValues}};
+{{/isEnum}}
+{{#vars}}
+{{#description}}
+    /**
+     * {{{description}}}
+     */
+{{/description}}
+    "{{name}}"{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{datatype}}}{{/isEnum}};
+{{/vars}}
+{{^isEnum}}
+}
+{{/isEnum}}
+
+{{#hasEnums}}
+{{#vars}}
+{{#isEnum}}
+export type {{{enumName}}} = {{#allowableValues}}{{#values}}"{{{.}}}"{{^-last}} | {{/-last}}{{/values}}{{/allowableValues}};
+{{/isEnum}}
+{{/vars}}
+{{/hasEnums}}
+{{/model}}
+{{/models}}
+
+{{#apiInfo}}
+{{#apis}}
+{{#operations}}
+
+export class {{classname}} extends BaseAPI {
+{{#operation}}
+  public {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }, {{/hasParams}}options?: FetchRequest): Promise<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}any{{/returnType}}> {
+    const queryParameters = {
+  {{#hasQueryParams}}
+    {{#queryParams}}
+        "{{baseName}}": params["{{paramName}}"],
+    {{/queryParams}}
+  {{/hasQueryParams}}
+    };
+    let body = null;
+  {{#hasBodyParam}}
+    options.headers = {"Content-Type": "application/json", ...options.headers};{{#bodyParam}}
+    if (params["{{paramName}}"]) {
+      body = JSON.stringify(params["{{paramName}}"] || {});
+    }{{/bodyParam}}
+  {{/hasBodyParam}}
+
+    return this.client.process({...{url: `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}}, method: '{{httpMethod}}', queryParameters, body}, ...options} as FetchRequest);
+  }
+{{/operation}}
+}
+{{/operations}}
+{{/apis}}
+{{/apiInfo}}
