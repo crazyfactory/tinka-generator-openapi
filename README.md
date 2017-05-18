@@ -10,6 +10,6 @@ In crazy factory, we have
 
 Here's the process  
 1) each api has its own spec.json file
-2) once spec.json in api is updated, spec.json api-client is automatically updated according to the former once, with meaningful tag.
+2) once spec.json in api is updated, spec.json in api-client is automatically updated according to the former one, with meaningful tag.
 3) then api-client will use the functionality of tinka-generator-openapi to generate a new sdk according to the updated spec
 4) api-client automatically published to NPM (via semantic-release?)
