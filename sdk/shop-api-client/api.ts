@@ -14,7 +14,7 @@
 import {Client, Service, FetchRequest} from "cyberhck-test";
 
 const BASE_PATH = "http://localhost:5555";
-class AuthMiddleware implements IMiddleware<any, any> {
+class AuthMiddleware implements IMiddleware < any, any > {
   process(options: FetchRequest, next?: (nextOptions: FetchRequest) => any): any {
     // we check if we have a auth_token
     // if we do, add it to options
@@ -26,15 +26,20 @@ class AuthMiddleware implements IMiddleware<any, any> {
   }
 }
 
-export class BaseAPI extends Service {
-  constructor() {
-    super(new Client({baseUrl: BASE_PATH}));
-    this.client.addMiddleware(new AuthMiddleware());
+class ProductsPage extends React.Component{
+  @inject
+  constructor(api: ProductsApi){
+    api.productsDetail()
   }
 }
 
-class Helper {
-  public static bakeUrl(raw, params) {
+export class BaseAPI extends Service {
+  @inject
+  constructor(client: Client) {
+    super(client);
+  }
+
+  protected bakeUrl(raw: string, params: {[key:string]: any}) {
     Object.keys(params).forEach((key) => {
       raw.replace("{" + key + "}", params[key])
     });
@@ -278,24 +283,24 @@ export class AuthApi extends BaseAPI {
     };
     let body = null;
 
-    return this.client.process({...{url: `/auth`, method: 'POST', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: "/auth", method: "POST", queryParameters, body}, ...options} as FetchRequest);
   }
   public delegation(params: {  "authorization": string; }, options?: FetchRequest): Promise<Authentication> {
     const queryParameters = {
     };
     let body = null;
 
-    return this.client.process({...{url: `/auth/delegation`, method: 'POST', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: "/auth/delegation", method: "POST", queryParameters, body}, ...options} as FetchRequest);
   }
 }
 
 export class BanksApi extends BaseAPI {
-  public getBankName(params: {  "code": string; }, options?: FetchRequest): Promise<any> {
+  public getBankName(params: {  "code": string; }, options?: FetchRequest): Promise< any > {
     const queryParameters = {
     };
     let body = null;
 
-    return this.client.process({...{url: `/banks/{code}`.replace(`{${"code"}}`, `${ params["code"] }`), method: 'GET', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: this.bakeUrl("/banks/{code}", params), method: "GET", queryParameters, body}, ...options} as FetchRequest);
   }
 }
 
@@ -305,14 +310,14 @@ export class CategoriesApi extends BaseAPI {
     };
     let body = null;
 
-    return this.client.process({...{url: `/categories/{id}`.replace(`{${"id"}}`, `${ params["id"] }`), method: 'GET', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: this.bakeUrl("/categories/{id}", params), method: "GET", queryParameters, body}, ...options} as FetchRequest);
   }
   public categoriesList(options?: FetchRequest): Promise<CategoriesList> {
     const queryParameters = {
     };
     let body = null;
 
-    return this.client.process({...{url: `/categories`, method: 'GET', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: "/categories", method: "GET", queryParameters, body}, ...options} as FetchRequest);
   }
 }
 
@@ -323,14 +328,14 @@ export class ProductsApi extends BaseAPI {
     };
     let body = null;
 
-    return this.client.process({...{url: `/products/{id}`.replace(`{${"id"}}`, `${ params["id"] }`), method: 'GET', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: this.bakeUrl("/products/{id}", params), method: "GET", queryParameters, body}, ...options} as FetchRequest);
   }
   public productsList(options?: FetchRequest): Promise<ProductsList> {
     const queryParameters = {
     };
     let body = null;
 
-    return this.client.process({...{url: `/products`, method: 'GET', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: "/products", method: "GET", queryParameters, body}, ...options} as FetchRequest);
   }
 }
 
@@ -344,28 +349,28 @@ export class ZonesApi extends BaseAPI {
       body = JSON.stringify(params["data"] || {});
     }
 
-    return this.client.process({...{url: `/zones`, method: 'POST', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: "/zones", method: "POST", queryParameters, body}, ...options} as FetchRequest);
   }
-  public zonesDelete(params: {  "id": number; }, options?: FetchRequest): Promise<any> {
+  public zonesDelete(params: {  "id": number; }, options?: FetchRequest): Promise< any > {
     const queryParameters = {
     };
     let body = null;
 
-    return this.client.process({...{url: `/zones/{id}`.replace(`{${"id"}}`, `${ params["id"] }`), method: 'DELETE', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: this.bakeUrl("/zones/{id}", params), method: "DELETE", queryParameters, body}, ...options} as FetchRequest);
   }
   public zonesDetail(params: {  "id": number; }, options?: FetchRequest): Promise<ZonesDetail> {
     const queryParameters = {
     };
     let body = null;
 
-    return this.client.process({...{url: `/zones/{id}`.replace(`{${"id"}}`, `${ params["id"] }`), method: 'GET', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: this.bakeUrl("/zones/{id}", params), method: "GET", queryParameters, body}, ...options} as FetchRequest);
   }
   public zonesList(options?: FetchRequest): Promise<ZonesList> {
     const queryParameters = {
     };
     let body = null;
 
-    return this.client.process({...{url: `/zones`, method: 'GET', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: "/zones", method: "GET", queryParameters, body}, ...options} as FetchRequest);
   }
   public zonesUpdate(params: {  "id": number; "data": Zones; }, options?: FetchRequest): Promise<ZonesDetail> {
     const queryParameters = {
@@ -376,6 +381,6 @@ export class ZonesApi extends BaseAPI {
       body = JSON.stringify(params["data"] || {});
     }
 
-    return this.client.process({...{url: `/zones/{id}`.replace(`{${"id"}}`, `${ params["id"] }`), method: 'PUT', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: this.bakeUrl("/zones/{id}", params), method: "PUT", queryParameters, body}, ...options} as FetchRequest);
   }
 }

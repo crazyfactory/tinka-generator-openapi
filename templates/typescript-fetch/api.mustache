@@ -20,10 +20,8 @@ export class BaseAPI extends Service {
     super(new Client({baseUrl: BASE_PATH}));
     this.client.addMiddleware(new AuthMiddleware());
   }
-}
 
-class Helper {
-  public static bakeUrl(raw, params) {
+  protected bakeUrl(raw: string, params: {[key:string]: any}) {
     Object.keys(params).forEach((key) => {
       raw.replace("{" + key + "}", params[key])
     });
@@ -88,7 +86,7 @@ export class {{classname}} extends BaseAPI {
     }{{/bodyParam}}
   {{/hasBodyParam}}
 
-    return this.client.process({...{url: `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}}, method: '{{httpMethod}}', queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: {{#hasPathParams}}this.bakeUrl("{{{path}}}", params){{/hasPathParams}}{{^hasPathParams}}"{{{path}}}"{{/hasPathParams}}, method: "{{httpMethod}}", queryParameters, body}, ...options} as FetchRequest);
   }
 {{/operation}}
 }
