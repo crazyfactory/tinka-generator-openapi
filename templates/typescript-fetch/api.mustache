@@ -3,7 +3,7 @@
 import {Client, Service, FetchRequest} from "cyberhck-test";
 
 const BASE_PATH = "{{{basePath}}}";
-class AuthMiddleware implements IMiddleware<any, any> {
+class AuthMiddleware implements IMiddleware < any, any > {
   process(options: FetchRequest, next?: (nextOptions: FetchRequest) => any): any {
     // we check if we have a auth_token
     // if we do, add it to options
@@ -72,7 +72,7 @@ export type {{{enumName}}} = {{#allowableValues}}{{#values}}"{{{.}}}"{{^-last}} 
 
 export class {{classname}} extends BaseAPI {
 {{#operation}}
-  public {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }, {{/hasParams}}options?: FetchRequest): Promise<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}any{{/returnType}}> {
+  public {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }, {{/hasParams}}options?: FetchRequest): Promise<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}} any {{/returnType}}> {
     const queryParameters = {
   {{#hasQueryParams}}
     {{#queryParams}}
