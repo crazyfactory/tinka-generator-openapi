@@ -1,0 +1,4 @@
+{DESCRIPTION}
+interface {NAME} {
+{BODY}
+}
