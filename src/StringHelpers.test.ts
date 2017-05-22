@@ -14,7 +14,7 @@ describe("toCamelCase function", () => {
     expect("categories list  api".toCamelCase()).to.equal("categoriesListApi");
   });
 
-  it("camelize pascal word", () => {
+  it("camelize pascalized word", () => {
     expect("CategoriesListApi".toCamelCase()).to.equal("categoriesListApi");
   });
 
@@ -23,24 +23,24 @@ describe("toCamelCase function", () => {
   });
 });
 
-describe("toPascasCase function", () => {
-  it("pascasize underscored word", () => {
+describe("toPascalCase function", () => {
+  it("pascalize underscored word", () => {
     expect("categories_list__api".toPascalCase()).to.equal("CategoriesListApi");
   });
 
-  it("pascasize hyphenated word", () => {
+  it("pascalize hyphenated word", () => {
     expect("categories-list--api".toPascalCase()).to.equal("CategoriesListApi");
   });
 
-  it("pascasize spaced word", () => {
+  it("pascalize spaced word", () => {
     expect("categories list  api".toPascalCase()).to.equal("CategoriesListApi");
   });
 
-  it("pascasize camelized word", () => {
+  it("pascalize camelized word", () => {
     expect("categoriesListApi".toPascalCase()).to.equal("CategoriesListApi");
   });
 
-  it("does nothing to pascasized word", () => {
+  it("does nothing to pascalized word", () => {
     expect("CategoriesListApi".toPascalCase()).to.equal("CategoriesListApi");
   });
 });
