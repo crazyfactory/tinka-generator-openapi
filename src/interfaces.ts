@@ -12,7 +12,7 @@ export interface IApiMethod {
   classNames: string[]; // meta data in order to match its class(es) later
   returnType: string;
   httpMethod: "GET" | "POST" | "PUT" | "DELETE";
-  methodParams: IParams[];
+  pathParams: IParams[];
   queryParams: IParams[];
   bodyParams: IParams[];
   url: string;
@@ -20,23 +20,27 @@ export interface IApiMethod {
 
 export interface IParams {
   name: string;
-  type: string;
-  in?: string;
+  in: string;
+  type?: string;
   description?: string;
   required?: true;
+  schema?: string;
 }
 
 export interface IPathsData {
   [url:string]: {
-    [httpMethod:string]: {
-      tags: string[],
-      operationId: string,
-      produces: string[],
-      consumes: string[],
-      summary: string,
-      description: string;
-      responses: any;
-      parameters: IParams[];
-    }
+    [httpMethod: string]: IHttpMethodDetail;
   }
+}
+
+export interface IHttpMethodDetail {
+  tags: string[],
+  operationId: string,
+  produces: string[],
+  consumes: string[],
+  summary: string,
+  description: string;
+  responses: any;
+  parameters: IParams[];
+  security?: any;
 }
