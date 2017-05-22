@@ -1,6 +1,7 @@
 import {BaseGenerator} from "./BaseGenerator";
 import {InterfaceGenerator} from "./InterfaceGenerator";
 import {ControllerGenerator} from "./ControllerGenerator";
+import {IGenerator} from "./interfaces";
 
 export class TypeScriptGenerator extends BaseGenerator {
   protected generateInterfaces() {

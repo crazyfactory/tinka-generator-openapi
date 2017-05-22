@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as jsome from "jsome";
 import * as path from "path";
+import {IGenerator} from "./interfaces";
 
 export class InterfaceGenerator implements IGenerator {
   private definitions;
