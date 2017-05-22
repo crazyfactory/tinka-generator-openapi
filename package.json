@@ -4,9 +4,8 @@
   "description": "This repo takes a spec file and generate ts-http-client sdk",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "test": "mocha -r ts-node/register src/**/*.test.ts",
     "start": "ts-node src/index.ts",
+    "test": "mocha -r ts-node/register src/**/*.test.ts",
     "generate-shop-api": "docker run --rm -t -v ${PWD}:/swagger swaggerapi/swagger-codegen-cli generate -i /swagger/spec.json -l typescript-fetch -o /swagger/sdk/shop-api-client -t /swagger/templates/typescript-fetch/",
     "generate-shop-api:windows": "docker run --rm -t -v %cd%:/swagger swaggerapi/swagger-codegen-cli generate -i /swagger/spec.json -l typescript-fetch -o /swagger/sdk/shop-api-client -t /swagger/templates/typescript-fetch/"
   },
