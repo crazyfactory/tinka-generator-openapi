@@ -1,3 +1,4 @@
+import {IGenerator} from "./interfaces";
 export class ControllerGenerator implements IGenerator{
   protected paths: any;
   constructor(data: any) {

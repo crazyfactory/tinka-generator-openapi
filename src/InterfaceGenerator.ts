@@ -1,3 +1,5 @@
+import {IGenerator} from "./interfaces";
+
 export class InterfaceGenerator implements IGenerator {
   private definitions;
 
