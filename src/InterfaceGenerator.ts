@@ -1,20 +1,18 @@
 import * as fs from "fs";
-import * as jsome from "jsome";
 import * as path from "path";
 import {IGenerator} from "./interfaces";
 
 export class InterfaceGenerator implements IGenerator {
   private definitions;
 
-  // todo: cleanup code, add required attributes, add description document
+  // todo: cleanup code, add required attributes, add description docs
   constructor(data: any, private prefixInterfaces: string = 'I') {
     this.definitions = data.definitions;
   }
 
   public generate() {
-    jsome(this.definitions);
     Object.keys(this.definitions).forEach((interfaceName) => {
-      this.generateInterfaceDefinition(interfaceName, this.definitions[interfaceName], this.prefixInterfaces);
+      console.log(this.generateInterfaceDefinition(interfaceName, this.definitions[interfaceName], this.prefixInterfaces));
     })
   }
 
@@ -32,24 +30,22 @@ export class InterfaceGenerator implements IGenerator {
 
   private getTypeDefinition(definition): string {
     let typeBody = [];
-    if (definition.type === 'object') {
-      Object.keys(definition.properties).forEach(key => {
-        if (definition.properties[key].type === 'array') {
-          typeBody = typeBody.concat(key + ": " + this.prefixInterfaces + InterfaceGenerator.toPascalCase(InterfaceGenerator.getInterfaceFromReference(definition.properties[key].items["$ref"])) + "[]");
-        } else if (definition.properties[key]["$ref"]) {
-          typeBody = typeBody.concat(key + ": " + this.prefixInterfaces + InterfaceGenerator.toPascalCase(InterfaceGenerator.getInterfaceFromReference(definition.properties[key]["$ref"].split("/"))));
-        } else {
-          typeBody = typeBody.concat(key + ": " + InterfaceGenerator.transformTypes(definition.properties[key].type !== "object" ? definition.properties[key].type : "any"));
-        }
-
-      })
-    }
+    // type is always object
+    Object.keys(definition.properties).forEach(key => {
+      if (definition.properties[key].type === 'array') {
+        typeBody = typeBody.concat(key + ": " + this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key].items["$ref"]) + "[]");
+      } else if (definition.properties[key]["$ref"]) {
+        typeBody = typeBody.concat(key + ": " + this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key]["$ref"]));
+      } else {
+        typeBody = typeBody.concat(key + ": " + InterfaceGenerator.transformTypes(definition.properties[key].type !== "object" ? definition.properties[key].type : "any"));
+      }
+    });
     return typeBody.join(",\n");
   }
 
   public static getInterfaceFromReference(ref: string) {
     const parts = ref.split("/");
-    return parts[parts.length - 1];
+    return InterfaceGenerator.toPascalCase(parts[parts.length - 1]);
   }
 
   public static transformTypes(type: string): string {

@@ -12,8 +12,8 @@ export abstract class BaseGenerator {
   protected controllersInfo: IController[];
 
   constructor(file: string) {
-    // const data: string = fs.readFileSync(path.resolve(file)).toString();
-    // this.jsonData = JSON.parse(data);
+    const data: string = fs.readFileSync(path.resolve(file)).toString();
+    this.jsonData = JSON.parse(data);
     // this.controllersInfo = this.extractControllersInfo(data);
   }
 
