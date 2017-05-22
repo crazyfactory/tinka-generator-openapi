@@ -12,21 +12,12 @@ export abstract class BaseGenerator {
   protected controllersInfo: IController[];
 
   constructor(file: string) {
-    // const data: string = fs.readFileSync(path.resolve(file)).toString();
-    // this.jsonData = JSON.parse(data);
-    // this.controllersInfo = this.extractControllersInfo(data);
+    const data: string = fs.readFileSync(path.resolve(file)).toString();
+    this.jsonData = JSON.parse(data);
   }
 
   public generate() {
     this.generateInterfaces();
     this.generateControllers();
   }
-
-  public helloWorld(): string {
-    return "Hello World";
-  }
-
-  // public extractControllersInfo(jsonData): IController[] {
-  //
-  // }
 }
