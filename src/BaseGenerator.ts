@@ -21,12 +21,4 @@ export abstract class BaseGenerator {
     this.generateInterfaces();
     this.generateControllers();
   }
-
-  public helloWorld(): string {
-    return "Hello World";
-  }
-
-  // public extractControllersInfo(jsonData): IController[] {
-  //
-  // }
 }
