@@ -26,7 +26,7 @@ export class TsControllerGenerator implements IGenerator {
     let paramsDef: string = "{";
     for(let param of params) {
       if (param.type === "integer") param.type = "number";
-      paramsDef += ` ${param.name}: ${param.type || param.schema.toPascalCase()};`;
+      paramsDef += ` ${param.name.toCamelCase()}: ${param.type || param.schema.toPascalCase()};`;
     }
     paramsDef += " }";
     return paramsDef;
@@ -39,19 +39,19 @@ export class TsControllerGenerator implements IGenerator {
     }
     if (apiMethod.url && apiMethod.url.length && apiMethod.pathParams.length) {
       for (let pathParam of apiMethod.pathParams) {
-        fetchRequest.url.replace("{" + pathParam.name +"}", "${" + pathParam.name + "}");
+        fetchRequest.url = fetchRequest.url.replace("{" + pathParam.name +"}", "${params." + pathParam.name.toCamelCase() + "}");
       }
     }
     if (apiMethod.queryParams.length) {
       fetchRequest.queryParameters = {};
       for (let queryParam of apiMethod.queryParams) {
-        fetchRequest.queryParameters[queryParam.name] = `params.${queryParam.name}`;
+        fetchRequest.queryParameters[queryParam.name] = `params.${queryParam.name.toCamelCase()}`;
       }
     }
     if (apiMethod.bodyParams.length) {
       let bodyStr: string = "{";
       for (let bodyParam of apiMethod.bodyParams) {
-        bodyStr += ` ...{params.${bodyParam.name}},`;
+        bodyStr += ` ...{params.${bodyParam.name.toCamelCase()}},`;
       }
       bodyStr = bodyStr.substr(0, bodyStr.length-1);
       bodyStr += "}";
@@ -60,7 +60,7 @@ export class TsControllerGenerator implements IGenerator {
     if (apiMethod.headerParams.length) {
       fetchRequest.headers = {};
       for (let headerParam of apiMethod.headerParams) {
-        fetchRequest.headers[headerParam.name] = `params.${headerParam.name}`;
+        fetchRequest.headers[headerParam.name] = `params.${headerParam.name.toCamelCase()}`;
       }
     }
     if (apiMethod.httpMethod) {
@@ -70,16 +70,16 @@ export class TsControllerGenerator implements IGenerator {
     return this.convertFetchRequestToString(fetchRequest);
   }
 
-  private convertFetchRequestToString(fetchRequest): string {
+  private convertFetchRequestToString(fetchRequest, addQuoteAroundKey = false): string {
     let result = "{";
     for (let key in fetchRequest) {
       const value = fetchRequest[key];
       if (typeof value === "object") {
-        const subValue = this.convertFetchRequestToString(value);
-        result += ` ${key}: ${subValue},`;
+        const subValue = this.convertFetchRequestToString(value, key === "headers");
+        result += addQuoteAroundKey ? ` "${key}": ${subValue},` : ` ${key}: ${subValue},`;
       }
       else {
-        result += ` ${key}: ${value},`;
+        result += addQuoteAroundKey ? ` "${key}": ${value},` : ` ${key}: ${value},`;
       }
     }
     result = result.substr(0, result.length - 1);

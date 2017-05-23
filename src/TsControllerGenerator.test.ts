@@ -30,6 +30,13 @@ describe("TsControllerGenerator", () => {
           "required": true
         },
         {
+          "name": "Content-Type",
+          "in": "header",
+          "type": "string",
+          "description": "Content Type",
+          "required": true
+        },
+        {
           "name": "search",
           "in": "query",
           "type": "string",
@@ -37,7 +44,7 @@ describe("TsControllerGenerator", () => {
           "required": true
         }
       ];
-      expect(gen.getParamsDef(allParams)).to.equal(`{ id: number; data: Zones; Authorization: string; search: string; }`);
+      expect(gen.getParamsDef(allParams)).to.equal(`{ id: number; data: Zones; authorization: string; contentType: string; search: string; }`);
     });
   });
 
@@ -52,7 +59,7 @@ describe("TsControllerGenerator", () => {
     it("returns correct url with pathParams", () =>{
       const gen = new TsControllerGenerator([]);
       const apiMethod: IApiMethod = new ApiMethod();
-      apiMethod.url = "/products/${id}";
+      apiMethod.url = "/products/{id}";
       apiMethod.pathParams = [{
         "name": "id",
         "in": "path",
@@ -60,20 +67,29 @@ describe("TsControllerGenerator", () => {
         "description": "Id of products",
         "required": true
       }];
-      expect(gen.getFetchRequest(apiMethod)).to.equal("{ url: `/products/${id}` }");
+      expect(gen.getFetchRequest(apiMethod)).to.equal("{ url: `/products/${params.id}` }");
     });
 
     it("returns correct queryParams", () => {
       const gen = new TsControllerGenerator([]);
       const apiMethod: IApiMethod = new ApiMethod();
-      apiMethod.queryParams = [{
-        "name": "search",
-        "in": "query",
-        "type": "string",
-        "description": "Search for products",
-        "required": true
-      }];
-      expect(gen.getFetchRequest(apiMethod)).to.equal("{ queryParameters: { search: params.search } }");
+      apiMethod.queryParams = [
+        {
+          "name": "search",
+          "in": "query",
+          "type": "string",
+          "description": "Search for products",
+          "required": true
+        },
+        {
+          "name": "secondSearch",
+          "in": "query",
+          "type": "string",
+          "description": "Search for products",
+          "required": true
+        }
+      ];
+      expect(gen.getFetchRequest(apiMethod)).to.equal("{ queryParameters: { search: params.search, secondSearch: params.secondSearch } }");
     });
 
     it("returns correct bodyParams", () => {
@@ -101,14 +117,23 @@ describe("TsControllerGenerator", () => {
     it("returns correct headerParams", () => {
       const gen = new TsControllerGenerator([]);
       const apiMethod: IApiMethod = new ApiMethod();
-      apiMethod.headerParams = [{
-        "name": "Authorization",
-        "in": "header",
-        "type": "string",
-        "description": "Refresh token",
-        "required": true
-      }];
-      expect(gen.getFetchRequest(apiMethod)).to.equal("{ headers: { Authorization: params.Authorization } }");
+      apiMethod.headerParams = [
+        {
+          "name": "Authorization",
+          "in": "header",
+          "type": "string",
+          "description": "Refresh token",
+          "required": true
+        },
+        {
+          "name": "Content-Type",
+          "in": "header",
+          "type": "string",
+          "description": "Content Type",
+          "required": true
+        }
+      ];
+      expect(gen.getFetchRequest(apiMethod)).to.equal(`{ headers: { "Authorization": params.authorization, "Content-Type": params.contentType } }`);
     });
 
     it("returns correct httpMethod", () => {
@@ -145,7 +170,7 @@ describe("TsControllerGenerator", () => {
         "required": true
       }];
       apiMethod.httpMethod = HttpMethod.POST;
-      expect(gen.getFetchRequest(apiMethod)).to.equal(`{ body: JSON.stringify({ ...{params.data}, ...{params.secondData}}), headers: { Authorization: params.Authorization }, method: "POST" }`);
+      expect(gen.getFetchRequest(apiMethod)).to.equal(`{ body: JSON.stringify({ ...{params.data}, ...{params.secondData}}), headers: { "Authorization": params.authorization }, method: "POST" }`);
     });
   });
 
