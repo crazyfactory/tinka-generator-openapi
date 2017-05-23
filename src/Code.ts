@@ -2,11 +2,15 @@ import {ICode} from "./interfaces";
 
 export class Code implements ICode{
   protected code: string;
-  protected children: ICode[];
+  public children: ICode[];
 
-  constructor(code: string) {
-    this.code = code;
+  constructor(firstLine: string) {
+    this.code = firstLine;
     this.children = [];
+  }
+
+  public addLine(line: string) {
+    this.code += `\n${line}`;
   }
 
   public addChild(code: ICode): void {

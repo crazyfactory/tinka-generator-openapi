@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import {BaseGenerator} from "./BaseGenerator";
 import {InterfaceGenerator} from "./InterfaceGenerator";
 import {TsControllerGenerator} from "./TsControllerGenerator";
@@ -9,8 +10,8 @@ export class TypeScriptGenerator extends BaseGenerator {
     generator.generate();
   }
 
-  protected generateControllers() {
+  protected generateControllers(): string {
     const tsGenerator: IGenerator = new TsControllerGenerator(this.apiControllers);
-    tsGenerator.generate();
+    return tsGenerator.generateString();
   }
 }

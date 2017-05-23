@@ -3,8 +3,30 @@ import {ICode} from "./interfaces";
 import {Code} from "./Code";
 
 describe("Code", () => {
+  describe("addChild()", () => {
+    it("adds child object to children property", () => {
+      let code: ICode = new Code("if (true)");
+      expect(code.children.length).to.equal(0);
+      let child: ICode = new Code("console.log('this is always true!'");
+      code.addChild(child);
+      expect(code.children.length).to.equal(1);
+      expect(code.children.toString()).to.equal("console.log('this is always true!'");
+    });
+  });
+
+  describe("addLine()", () => {
+    it("concats string to this.code into a new line", () => {
+      let code: ICode = new Code("console.log('this if first line');");
+      code.addLine("console.log('this is second line');");
+      expect(code.toString()).to.equal(
+        "console.log('this if first line');\n" +
+        "console.log('this is second line');"
+      );
+    })
+  });
+
   describe("toString()", () => {
-    it('should produce correct codes', () => {
+    it("produces correct codes", () => {
       let parent: ICode = new Code("for (let i = 0; i < 10; i++)");
       let child: ICode = new Code("console.log('in the loop!');");
       let secondChild: ICode = new Code("if (i === 5)");

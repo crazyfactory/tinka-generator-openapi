@@ -8,18 +8,43 @@ export class TsControllerGenerator implements IGenerator {
     this.apiControllers = apiControllers;
   }
 
-  public generate() {
+  public generate(): void {
 
   }
 
-  // public generateApiController(): ICode {
-  //
-  // }
+  public generateString(): string {
+    let codeString: string = "";
+    const codes: ICode[] = this.generateApiControllerCodes();
+    for(let code of codes) {
+      codeString += code.toString() + "\n";
+    }
+    return codeString;
+  }
+
+  public generateApiControllerCodes(): ICode[] {
+    let controllerCodes: ICode[] = [];
+    for (let apiController of this.apiControllers) {
+      let controllerCode: ICode = new Code(`export class ${apiController.name.toPascalCase()} extends BaseAPI`);
+      for (let apiMethod of apiController.methods) {
+        controllerCode.addChild(this.generateApiMethodCode(apiMethod));
+      }
+      controllerCodes.push(controllerCode);
+    }
+    return controllerCodes;
+  }
 
   public generateApiMethodCode(apiMethod: IApiMethod): ICode {
-    const paramsDef: string = this.getParamsDefinition(apiMethod.allParams);
-    let parent: ICode = new Code(`public ${apiMethod.name.toCamelCase()}(params: ${paramsDef}, options?: FetchRequest): Promise<`
-      + apiMethod.returnType.toPascalCase() + `>`);
+    let paramsAndOptions: string = "";
+    if (apiMethod.allParams.length) {
+      const paramsDef = this.getParamsDefinition(apiMethod.allParams);
+      paramsAndOptions = `params: ${paramsDef}, options?: FetchRequest`;
+    }
+    else {
+      paramsAndOptions = `options?: FetchRequest`;
+    }
+
+    const returnType = apiMethod.returnType ? "Promise<" + apiMethod.returnType.toPascalCase() + ">" : "void";
+    let parent: ICode = new Code(`public ${apiMethod.name.toCamelCase()}(${paramsAndOptions}): ${returnType}`);
     let fetchRequestString: string = `return this.client.process({...${this.getFetchRequestString(apiMethod)}, ...options} as FetchRequest);`;
     let child: ICode = new Code(fetchRequestString);
     parent.addChild(child);

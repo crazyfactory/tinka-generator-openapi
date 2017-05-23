@@ -20,7 +20,12 @@ export abstract class BaseGenerator {
   }
 
   public generate() {
-    this.generateInterfaces();
-    this.generateControllers();
+    // this.generateInterfaces();
+    const controllersString = this.generateControllers();
+
+    fs.writeFile("generated-api.ts", controllersString, (err) => {
+      if (err) throw err;
+      console.log("The file has been saved!");
+    });
   }
 }

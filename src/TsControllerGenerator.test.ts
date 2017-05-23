@@ -1,11 +1,154 @@
 import {expect} from "chai";
 import {TsControllerGenerator} from "./TsControllerGenerator";
-import {HttpMethod, IApiMethod, ICode, IParams} from "./interfaces";
+import {HttpMethod, IApiMethod, ICode, IParams, IApiController} from "./interfaces";
 import {ApiMethod} from "./models/ApiMethod";
 
 describe("TsControllerGenerator", () => {
+  const categoriesListMethod: IApiMethod = {
+    name: "categories-list",
+    classNames: ["categories"],
+    returnType: "categories_list",
+    httpMethod: HttpMethod.GET,
+    allParams: [],
+    pathParams: [],
+    queryParams: [],
+    bodyParams: [],
+    headerParams: [],
+    url: "/categories"
+  };
+  const categoriesDetailMethod: IApiMethod = {
+    name: "categories-detail",
+    classNames: ["categories"],
+    returnType: "categories_detail",
+    httpMethod: HttpMethod.GET,
+    allParams: [
+      {
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "description": "Id of categories",
+        "required": true
+      }
+    ],
+    pathParams: [
+      {
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "description": "Id of categories",
+        "required": true
+      }
+    ],
+    queryParams: [],
+    bodyParams: [],
+    headerParams: [],
+    url: "/categories/{id}"
+  };
+  const zonesUpdateMethod: IApiMethod = {
+    name: "zones-update",
+    classNames: ["zones"],
+    returnType: "zones_detail",
+    httpMethod: HttpMethod.PUT,
+    allParams: [
+      {
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "description": "Id of zones",
+        "required": true
+      },
+      {
+        "name": "data",
+        "in": "body",
+        "required": true,
+        "description": "",
+        "schema": "zones"
+      }
+    ],
+    pathParams: [
+      {
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "description": "Id of zones",
+        "required": true
+      }
+    ],
+    queryParams: [],
+    bodyParams: [
+      {
+        "name": "data",
+        "in": "body",
+        "required": true,
+        "description": "",
+        "schema": "zones"
+      }
+    ],
+    headerParams: [],
+    url: "/zones/{id}"
+  };
+  const zonesDeleteMethod: IApiMethod = {
+    name: "zones-delete",
+    classNames: ["zones"],
+    returnType: null,
+    httpMethod: HttpMethod.DELETE,
+    allParams: [
+      {
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "description": "Id of zones",
+        "required": true
+      }
+    ],
+    pathParams: [
+      {
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "description": "Id of zones",
+        "required": true
+      }
+    ],
+    queryParams: [],
+    bodyParams: [],
+    headerParams: [],
+    url: "/zones/{id}"
+  };
+  const categoriesController: IApiController = {
+    name: "categories",
+    methods: [categoriesListMethod, categoriesDetailMethod]
+  }
+  const zonesController: IApiController = {
+    name: "zones",
+    methods: [zonesUpdateMethod, zonesDeleteMethod]
+  }
+
+  describe("generateApiControllerCodes()", () => {
+    let codes: ICode[];
+
+    beforeEach(() => {
+      const gen = new TsControllerGenerator([categoriesController, zonesController]);
+      codes = gen.generateApiControllerCodes();
+    });
+
+    it("writes first line of class correctly", () => {
+      const firstControllerString = codes[0].toString();
+      expect(firstControllerString.substr(0, firstControllerString.indexOf("\n"))).equal("export class Categories extends BaseAPI {");
+    });
+
+    it("contains correct number of controller codes", () => {
+      expect(codes.length).to.equal(2);
+    });
+
+    it("assigns correct number of method codes to controller codes", () => {
+      expect(codes[0].children.length).to.equal(2);
+      expect(codes[1].children.length).to.equal(2);
+    })
+  });
+
   describe("generateApiMethodCode()", () => {
-    it("returns collect api method string", () => {
+    it("returns correct api method string", () => {
       const apiMethod: IApiMethod = new ApiMethod();
       apiMethod.name = "zones-update";
       apiMethod.classNames = ["zones"];
@@ -65,6 +208,18 @@ describe("TsControllerGenerator", () => {
         "return this.client.process({...{ url: `/zones/${params.id}`, body: JSON.stringify({ ...params.data}), headers: { \"Content-Type\": params.contentType }, method: \"PUT\" }, ...options} as FetchRequest);\n" +
         "}"
       );
+    });
+
+    it("does not write params if params are empty", () => {
+      const gen = new TsControllerGenerator([]);
+      const code: ICode = gen.generateApiMethodCode(categoriesListMethod);
+      expect(code.toString()).to.contains("public categoriesList(options?: FetchRequest):");
+    });
+
+    it("sets return type to void if returnType is null", () => {
+      const gen = new TsControllerGenerator([]);
+      const code: ICode = gen.generateApiMethodCode(zonesDeleteMethod);
+      expect(code.toString()).to.contains("options?: FetchRequest): void {");
     });
   });
 
@@ -237,6 +392,4 @@ describe("TsControllerGenerator", () => {
       expect(gen.getFetchRequestString(apiMethod)).to.equal(`{ body: JSON.stringify({ ...params.data, ...params.secondData}), headers: { "Authorization": params.authorization }, method: "POST" }`);
     });
   });
-
-
 });

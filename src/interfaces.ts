@@ -1,5 +1,6 @@
 export interface IGenerator {
   generate: () => void;
+  generateString?: () => string;
 }
 
 export interface IApiController {
@@ -28,7 +29,7 @@ export interface IParams {
   type?: string;
   description?: string;
   required?: true;
-  schema?: any;
+  schema?: string;
 }
 
 export interface IApiData {
@@ -60,6 +61,8 @@ export interface IPathsData {
 }
 
 export interface ICode {
+  children: ICode[];
   addChild(code: ICode): void;
+  addLine(line: string): void;
   toString(): string;
 }
