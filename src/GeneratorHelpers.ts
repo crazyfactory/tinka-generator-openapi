@@ -26,10 +26,10 @@ export class GeneratorHelpers {
             controllers.push({
               name: className,
               methods: []
-            })
+            });
             classNames.push(className);
           }
-        })
+        });
       }
     }
     return controllers;
