@@ -61,5 +61,5 @@ export interface IPathsData {
 
 export interface ICode {
   addChild(code: ICode): void;
-  getCodeString(): string;
+  toString(): string;
 }

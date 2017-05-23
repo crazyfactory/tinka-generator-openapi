@@ -1,10 +1,74 @@
 import {expect} from "chai";
 import {TsControllerGenerator} from "./TsControllerGenerator";
-import {HttpMethod, IApiMethod, IParams} from "./interfaces";
+import {HttpMethod, IApiMethod, ICode, IParams} from "./interfaces";
 import {ApiMethod} from "./models/ApiMethod";
 
 describe("TsControllerGenerator", () => {
-  describe("getParamsDef()", () => {
+  describe("generateApiMethodCode()", () => {
+    it("returns collect api method string", () => {
+      const apiMethod: IApiMethod = new ApiMethod();
+      apiMethod.name = "zones-update";
+      apiMethod.classNames = ["zones"];
+      apiMethod.returnType = "zones_detail";
+      apiMethod.httpMethod = HttpMethod.PUT;
+      apiMethod.allParams = [
+        {
+          "name": "id",
+          "in": "path",
+          "type": "integer",
+          "description": "Id of zones",
+          "required": true
+        },
+        {
+          "name": "data",
+          "in": "body",
+          "required": true,
+          "description": "",
+          "schema": "zones"
+        },
+        {
+          "name": "Content-Type",
+          "in": "header",
+          "type": "string",
+          "description": "Content Type",
+          "required": true
+        }
+      ];
+      apiMethod.pathParams = [{
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "description": "Id of zones",
+        "required": true
+      }];
+      apiMethod.bodyParams = [{
+        "name": "data",
+        "in": "body",
+        "required": true,
+        "description": "",
+        "schema": "zones"
+      }];
+      apiMethod.headerParams = [{
+          "name": "Content-Type",
+          "in": "header",
+          "type": "string",
+          "description": "Content Type",
+          "required": true
+      }];
+      apiMethod.url = "/zones/{id}";
+
+      const gen = new TsControllerGenerator([]);
+      const code: ICode = gen.generateApiMethodCode(apiMethod);
+
+      expect(code.toString()).to.equal(
+        "public zonesUpdate(params: { id: number; data: Zones; contentType: string; }, options?: FetchRequest): Promise<ZonesDetail> {\n" +
+        "return this.client.process({...{ url: `/zones/${params.id}`, body: JSON.stringify({ ...params.data}), headers: { \"Content-Type\": params.contentType }, method: \"PUT\" }, ...options} as FetchRequest);\n" +
+        "}"
+      );
+    });
+  });
+
+  describe("getParamsDefinition()", () => {
     it("returns correct params def", () => {
       const gen = new TsControllerGenerator([]);
       const allParams: IParams[] = [
@@ -44,16 +108,16 @@ describe("TsControllerGenerator", () => {
           "required": true
         }
       ];
-      expect(gen.getParamsDef(allParams)).to.equal(`{ id: number; data: Zones; authorization: string; contentType: string; search: string; }`);
+      expect(gen.getParamsDefinition(allParams)).to.equal(`{ id: number; data: Zones; authorization: string; contentType: string; search: string; }`);
     });
   });
 
-  describe("getFetchRequestObject()", () => {
+  describe("getFetchRequestString()", () => {
     it("returns correct url", () => {
       const gen = new TsControllerGenerator([]);
       const apiMethod: IApiMethod = new ApiMethod();
       apiMethod.url = "/products";
-      expect(gen.getFetchRequest(apiMethod)).to.equal("{ url: `/products` }");
+      expect(gen.getFetchRequestString(apiMethod)).to.equal("{ url: `/products` }");
     });
 
     it("returns correct url with pathParams", () =>{
@@ -67,7 +131,7 @@ describe("TsControllerGenerator", () => {
         "description": "Id of products",
         "required": true
       }];
-      expect(gen.getFetchRequest(apiMethod)).to.equal("{ url: `/products/${params.id}` }");
+      expect(gen.getFetchRequestString(apiMethod)).to.equal("{ url: `/products/${params.id}` }");
     });
 
     it("returns correct queryParams", () => {
@@ -89,7 +153,7 @@ describe("TsControllerGenerator", () => {
           "required": true
         }
       ];
-      expect(gen.getFetchRequest(apiMethod)).to.equal("{ queryParameters: { search: params.search, secondSearch: params.secondSearch } }");
+      expect(gen.getFetchRequestString(apiMethod)).to.equal("{ queryParameters: { search: params.search, secondSearch: params.secondSearch } }");
     });
 
     it("returns correct bodyParams", () => {
@@ -111,7 +175,7 @@ describe("TsControllerGenerator", () => {
           "schema": "zones"
         }
       ];
-      expect(gen.getFetchRequest(apiMethod)).to.equal("{ body: JSON.stringify({ ...{params.data}, ...{params.secondData}}) }");
+      expect(gen.getFetchRequestString(apiMethod)).to.equal("{ body: JSON.stringify({ ...params.data, ...params.secondData}) }");
     });
 
     it("returns correct headerParams", () => {
@@ -133,14 +197,14 @@ describe("TsControllerGenerator", () => {
           "required": true
         }
       ];
-      expect(gen.getFetchRequest(apiMethod)).to.equal(`{ headers: { "Authorization": params.authorization, "Content-Type": params.contentType } }`);
+      expect(gen.getFetchRequestString(apiMethod)).to.equal(`{ headers: { "Authorization": params.authorization, "Content-Type": params.contentType } }`);
     });
 
     it("returns correct httpMethod", () => {
       const gen = new TsControllerGenerator([]);
       const apiMethod: IApiMethod = new ApiMethod();
       apiMethod.httpMethod = HttpMethod.PUT;
-      expect(gen.getFetchRequest(apiMethod)).to.equal(`{ method: "PUT" }`);
+      expect(gen.getFetchRequestString(apiMethod)).to.equal(`{ method: "PUT" }`);
     });
 
     it("constructs string with multiple keys correctly", () =>{
@@ -170,7 +234,7 @@ describe("TsControllerGenerator", () => {
         "required": true
       }];
       apiMethod.httpMethod = HttpMethod.POST;
-      expect(gen.getFetchRequest(apiMethod)).to.equal(`{ body: JSON.stringify({ ...{params.data}, ...{params.secondData}}), headers: { "Authorization": params.authorization }, method: "POST" }`);
+      expect(gen.getFetchRequestString(apiMethod)).to.equal(`{ body: JSON.stringify({ ...params.data, ...params.secondData}), headers: { "Authorization": params.authorization }, method: "POST" }`);
     });
   });
 

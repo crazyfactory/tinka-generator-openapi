@@ -16,15 +16,19 @@ export class TsControllerGenerator implements IGenerator {
   //
   // }
 
-  // public generateApiMethod(apiMethod: IApiMethod): ICode {
-  //   const paramsDef: string = this.getParamsDef(apiMethod.allParams);
-  //   let parent: ICode = new Code(`public ${apiMethod.name.toCamelCase()}(params: ${paramsDef}, options?: FetchRequest): Promize<`
-  //     + apiMethod.returnType.toPascalCase() + `>`);
-  // }
+  public generateApiMethodCode(apiMethod: IApiMethod): ICode {
+    const paramsDef: string = this.getParamsDefinition(apiMethod.allParams);
+    let parent: ICode = new Code(`public ${apiMethod.name.toCamelCase()}(params: ${paramsDef}, options?: FetchRequest): Promise<`
+      + apiMethod.returnType.toPascalCase() + `>`);
+    let fetchRequestString: string = `return this.client.process({...${this.getFetchRequestString(apiMethod)}, ...options} as FetchRequest);`;
+    let child: ICode = new Code(fetchRequestString);
+    parent.addChild(child);
+    return parent;
+  }
 
-  public getParamsDef(params: IParams[]): string {
+  public getParamsDefinition(params: IParams[]): string {
     let paramsDef: string = "{";
-    for(let param of params) {
+    for (let param of params) {
       if (param.type === "integer") param.type = "number";
       paramsDef += ` ${param.name.toCamelCase()}: ${param.type || param.schema.toPascalCase()};`;
     }
@@ -32,7 +36,7 @@ export class TsControllerGenerator implements IGenerator {
     return paramsDef;
   }
 
-  public getFetchRequest(apiMethod: IApiMethod): string {
+  public getFetchRequestString(apiMethod: IApiMethod): string {
     let fetchRequest: any = {};
     if (apiMethod.url && apiMethod.url.length) {
       fetchRequest.url = "`" + apiMethod.url + "`";
@@ -51,7 +55,7 @@ export class TsControllerGenerator implements IGenerator {
     if (apiMethod.bodyParams.length) {
       let bodyStr: string = "{";
       for (let bodyParam of apiMethod.bodyParams) {
-        bodyStr += ` ...{params.${bodyParam.name.toCamelCase()}},`;
+        bodyStr += ` ...params.${bodyParam.name.toCamelCase()},`;
       }
       bodyStr = bodyStr.substr(0, bodyStr.length-1);
       bodyStr += "}";

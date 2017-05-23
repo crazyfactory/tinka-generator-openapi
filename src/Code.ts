@@ -13,9 +13,9 @@ export class Code implements ICode{
     this.children.push(code);
   }
 
-  public getCodeString(): string {
+  public toString(): string {
     if (this.children.length > 0) {
-      return this.code + " {\n" + this.children.map(child => child.getCodeString()).reduce((prev, curr) => prev + "\n" + curr) + "\n}";
+      return this.code + " {\n" + this.children.map(child => child.toString()).reduce((prev, curr) => prev + "\n" + curr) + "\n}";
     }
     return this.code;
   }
