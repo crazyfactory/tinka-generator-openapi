@@ -662,6 +662,142 @@ describe("GeneratorHelpers", () => {
     }
   };
 
+  describe("getApiControllers()", () => {
+    it("copy apiMethods into EVERY emptyApiControllers correctly", () => {
+      const emptyApiControllers: IApiController[] = [
+        {
+          name: "products",
+          methods: []
+        },
+        {
+          name: "zones",
+          methods: []
+        }
+      ];
+      const apiMethods: IApiMethod[] = [
+        {
+          name: "product-detail",
+          classNames: ["products", "zones"],
+          returnType: "products_detail",
+          httpMethod: HttpMethod.GET,
+          pathParams: [{
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          }],
+          bodyParams: [],
+          queryParams: [],
+          headerParams: [],
+          url: "/products/{id}"
+        }
+      ];
+      const apiControllers = GeneratorHelpers.getApiControllers(emptyApiControllers, apiMethods);
+      expect(apiControllers[0].methods[0]).to.deep.equal(apiMethods[0]);
+      expect(apiControllers[1].methods[0]).to.deep.equal(apiMethods[0]);
+    });
+    it("copy EVERY apiMethods into emptyApiControllers correctly", () => {
+      const emptyApiControllers: IApiController[] = [
+        {
+          name: "products",
+          methods: []
+        }
+      ];
+      const apiMethods: IApiMethod[] = [
+        {
+          name: "product-detail",
+          classNames: ["products"],
+          returnType: "products_detail",
+          httpMethod: HttpMethod.GET,
+          pathParams: [{
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          }],
+          bodyParams: [],
+          queryParams: [],
+          headerParams: [],
+          url: "/products/{id}"
+        },
+        {
+          name: "product-list",
+          classNames: ["products"],
+          returnType: "products_detail",
+          httpMethod: HttpMethod.GET,
+          pathParams: [],
+          bodyParams: [],
+          queryParams: [],
+          headerParams: [],
+          url: "/products"
+        }
+      ];
+      const apiControllers = GeneratorHelpers.getApiControllers(emptyApiControllers, apiMethods);
+      expect(apiControllers[0].methods[0]).to.deep.equal(apiMethods[0]);
+      expect(apiControllers[0].methods[1]).to.deep.equal(apiMethods[1]);
+    });
+    it("does not copy apiMethods into emptyApiControllers if class names are not matched", () => {
+      const emptyApiControllers: IApiController[] = [
+        {
+          name: "categories",
+          methods: []
+        }
+      ];
+      const apiMethods: IApiMethod[] = [
+        {
+          name: "product-detail",
+          classNames: ["products"],
+          returnType: "products_detail",
+          httpMethod: HttpMethod.GET,
+          pathParams: [{
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          }],
+          bodyParams: [],
+          queryParams: [],
+          headerParams: [],
+          url: "/products/{id}"
+        }
+      ];
+      const apiControllers = GeneratorHelpers.getApiControllers(emptyApiControllers, apiMethods);
+      expect(apiControllers[0].methods.length).to.equal(0);
+    });
+    it("does not copy duplicated apiMethods into emptyApiControllers", () => {
+      const emptyApiControllers: IApiController[] = [
+        {
+          name: "products",
+          methods: []
+        }
+      ];
+      const apiMethods: IApiMethod[] = [
+        {
+          name: "product-detail",
+          classNames: ["products", "products"],
+          returnType: "products_detail",
+          httpMethod: HttpMethod.GET,
+          pathParams: [{
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          }],
+          bodyParams: [],
+          queryParams: [],
+          headerParams: [],
+          url: "/products/{id}"
+        }
+      ];
+      const apiControllers = GeneratorHelpers.getApiControllers(emptyApiControllers, apiMethods);
+      expect(apiControllers[0].methods.length).to.equal(1);
+    });
+  });
+
   describe("getEmptyApiControllers()", () => {
     it("returns all correct controllers", () => {
       const controllers: IApiController[] = GeneratorHelpers.getEmptyApiControllers(paths);
@@ -675,7 +811,7 @@ describe("GeneratorHelpers", () => {
     });
   });
 
-  describe("getApiMethods", () => {
+  describe("getApiMethods()", () => {
     let methods: IApiMethod[];
     beforeEach(() => {
       methods = GeneratorHelpers.getApiMethods(paths);

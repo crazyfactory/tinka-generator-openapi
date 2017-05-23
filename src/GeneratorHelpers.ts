@@ -3,7 +3,17 @@ import {ApiMethod} from "./models/ApiMethod";
 
 export class GeneratorHelpers {
   public static getApiControllers(emptyApiControllers: IApiController[], apiMethods: IApiMethod[]): IApiController[] {
-
+    for (let emptyApiController of emptyApiControllers) {
+      for (let apiMethod of apiMethods) {
+        for(let className of apiMethod.classNames) {
+          if (emptyApiController.name === className) {
+            emptyApiController.methods.push(apiMethod);
+            break; // need to add this method only once
+          }
+        }
+      }
+    }
+    return emptyApiControllers; // this is not empty anymore
   }
 
   public static getEmptyApiControllers(paths: IPathsData): IApiController[] {
