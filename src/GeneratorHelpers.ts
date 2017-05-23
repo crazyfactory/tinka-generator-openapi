@@ -51,6 +51,7 @@ export class GeneratorHelpers {
         }
 
         method.httpMethod = this.cleanHttpMethod(httpMethod);
+        method.allParams = paths[url][httpMethod].parameters;
 
         for (let parameter of paths[url][httpMethod].parameters) {
           if (parameter.schema && parameter.schema["$ref"]) {

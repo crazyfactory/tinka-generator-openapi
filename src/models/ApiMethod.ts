@@ -4,6 +4,7 @@ export class ApiMethod implements IApiMethod{
   public classNames: string[]; // meta data in order to match its controllers later
   public returnType: string;
   public httpMethod: HttpMethod;
+  public allParams: IParams[];
   public pathParams: IParams[];
   public queryParams: IParams[];
   public bodyParams: IParams[];
@@ -15,6 +16,7 @@ export class ApiMethod implements IApiMethod{
     this.classNames = [];
     this.returnType = null;
     this.httpMethod = null;
+    this.allParams = [];
     this.pathParams = [];
     this.queryParams = [];
     this.bodyParams = [];

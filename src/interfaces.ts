@@ -12,6 +12,7 @@ export interface IApiMethod {
   classNames: string[]; // meta data in order to match its controllers later
   returnType: string;
   httpMethod: HttpMethod;
+  allParams: IParams[];
   pathParams: IParams[];
   queryParams: IParams[];
   bodyParams: IParams[];

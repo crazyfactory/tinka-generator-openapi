@@ -381,6 +381,6 @@ export class ZonesApi extends BaseAPI {
       body = JSON.stringify(params["data"] || {});
     }
 
-    return this.client.process({...{url: this.bakeUrl("/zones/{id}", params), method: "PUT", queryParameters, body}, ...options} as FetchRequest);
+    return this.client.process({...{url: this.bakeUrl("/zones/id", params), method: "PUT", queryParameters, body}, ...options} as FetchRequest);
   }
 }

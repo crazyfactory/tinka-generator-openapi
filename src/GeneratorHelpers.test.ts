@@ -680,6 +680,13 @@ describe("GeneratorHelpers", () => {
           classNames: ["products", "zones"],
           returnType: "products_detail",
           httpMethod: HttpMethod.GET,
+          allParams: [{
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          }],
           pathParams: [{
             "name": "id",
             "in": "path",
@@ -710,6 +717,13 @@ describe("GeneratorHelpers", () => {
           classNames: ["products"],
           returnType: "products_detail",
           httpMethod: HttpMethod.GET,
+          allParams: [{
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          }],
           pathParams: [{
             "name": "id",
             "in": "path",
@@ -727,6 +741,7 @@ describe("GeneratorHelpers", () => {
           classNames: ["products"],
           returnType: "products_detail",
           httpMethod: HttpMethod.GET,
+          allParams: [],
           pathParams: [],
           bodyParams: [],
           queryParams: [],
@@ -751,6 +766,13 @@ describe("GeneratorHelpers", () => {
           classNames: ["products"],
           returnType: "products_detail",
           httpMethod: HttpMethod.GET,
+          allParams: [{
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          }],
           pathParams: [{
             "name": "id",
             "in": "path",
@@ -780,6 +802,13 @@ describe("GeneratorHelpers", () => {
           classNames: ["products", "products"],
           returnType: "products_detail",
           httpMethod: HttpMethod.GET,
+          allParams: [{
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "description": "Id of products",
+            "required": true
+          }],
           pathParams: [{
             "name": "id",
             "in": "path",
@@ -835,6 +864,25 @@ describe("GeneratorHelpers", () => {
       expect(methods[9].httpMethod).to.equal(HttpMethod.GET);
       expect(methods[10].httpMethod).to.equal(HttpMethod.PUT);
       expect(methods[11].httpMethod).to.equal(HttpMethod.DELETE);
+    });
+    it("returns correct method's allParams", () => {
+      expect(methods[0].allParams.length).to.equal(0);
+      expect(methods[10].allParams).to.deep.equal([
+        {
+          "name": "id",
+          "in": "path",
+          "type": "integer",
+          "description": "Id of zones",
+          "required": true
+        },
+        {
+          "name": "data",
+          "in": "body",
+          "required": true,
+          "description": "",
+          "schema": "zones"
+        }
+      ]);
     });
     it("returns correct method's queryParams", () => {
       expect(methods[5].queryParams.length).to.equal(0);
