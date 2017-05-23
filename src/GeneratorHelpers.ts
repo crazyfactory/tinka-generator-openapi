@@ -2,11 +2,11 @@ import {HttpMethod, IApiMethod, IApiController, IPathsData} from "./interfaces";
 import {ApiMethod} from "./models/ApiMethod";
 
 export class GeneratorHelpers {
-  // public static extractControllersInfo(paths: IPathsData): IController[] {
-  //
-  // }
+  public static getApiControllers(emptyApiControllers: IApiController[], apiMethods: IApiMethod[]): IApiController[] {
 
-  public static getAllApiControllers(paths: IPathsData): IApiController[] {
+  }
+
+  public static getEmptyApiControllers(paths: IPathsData): IApiController[] {
     let controllers: IApiController[] = [];
     let classNames: string[] = [];
     for (let url in paths) {
@@ -25,7 +25,7 @@ export class GeneratorHelpers {
     return controllers;
   }
 
-  public static getAllApiMethods(paths: IPathsData): IApiMethod[] {
+  public static getApiMethods(paths: IPathsData): IApiMethod[] {
     let methods: IApiMethod[] = [];
     for (let url in paths) {
       for (let httpMethod in paths[url]) {
@@ -87,6 +87,4 @@ export class GeneratorHelpers {
         throw `Unknown httpMethod -> ${httpMethod.toUpperCase()}`;
     }
   }
-
-  private static
 }

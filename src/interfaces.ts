@@ -30,6 +30,18 @@ export interface IParams {
   schema?: any;
 }
 
+export interface IApiData {
+  swagger: string;
+  info: any;
+  host: string;
+  basePath: string;
+  schemes: string[];
+  definitions: any;
+  paths: IPathsData;
+  externalDocs: any;
+  securityDefinitions: any;
+}
+
 export interface IPathsData {
   [url:string]: {
     [httpMethod: string]: {

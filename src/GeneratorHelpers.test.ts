@@ -662,9 +662,9 @@ describe("GeneratorHelpers", () => {
     }
   };
 
-  describe("getAllApiControllers()", () => {
+  describe("getEmptyApiControllers()", () => {
     it("returns all correct controllers", () => {
-      const controllers: IApiController[] = GeneratorHelpers.getAllApiControllers(paths);
+      const controllers: IApiController[] = GeneratorHelpers.getEmptyApiControllers(paths);
       const validClassNames: string[] = ["auth", "banks", "categories", "products", "zones"];
       expect(controllers.length).to.equal(validClassNames.length,
         "Expect number of controllers to be equal number of valid class names, but it isn't");
@@ -675,10 +675,10 @@ describe("GeneratorHelpers", () => {
     });
   });
 
-  describe("getAllApiMethods", () => {
+  describe("getApiMethods", () => {
     let methods: IApiMethod[];
     beforeEach(() => {
-      methods = GeneratorHelpers.getAllApiMethods(paths);
+      methods = GeneratorHelpers.getApiMethods(paths);
     });
 
     it("returns correct number of methods", () => {
@@ -789,7 +789,7 @@ describe("GeneratorHelpers", () => {
           }
         }
       };
-      expect(GeneratorHelpers.getAllApiMethods.bind(GeneratorHelpers, localPaths)).to.throw("Unknown param type -> ABC");
+      expect(GeneratorHelpers.getApiMethods.bind(GeneratorHelpers, localPaths)).to.throw("Unknown param type -> ABC");
     })
     it("returns correct method's url", () => {
       expect(methods[11].url).to.equal("/zones/{id}");
