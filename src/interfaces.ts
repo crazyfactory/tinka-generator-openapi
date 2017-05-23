@@ -29,7 +29,7 @@ export interface IParams {
   type?: string;
   description?: string;
   required?: true;
-  schema?: string;
+  schema?: any;
 }
 
 export interface IApiData {
