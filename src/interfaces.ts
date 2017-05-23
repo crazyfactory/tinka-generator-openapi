@@ -2,21 +2,24 @@ export interface IGenerator {
   generate: () => void;
 }
 
-export interface IController {
+export interface IApiController {
   name: string;
   methods: IApiMethod[];
 }
 
 export interface IApiMethod {
   name: string;
-  classNames: string[]; // meta data in order to match its class(es) later
+  classNames: string[]; // meta data in order to match its controllers later
   returnType: string;
-  httpMethod: "GET" | "POST" | "PUT" | "DELETE";
+  httpMethod: HttpMethod;
   pathParams: IParams[];
   queryParams: IParams[];
   bodyParams: IParams[];
+  headerParams: IParams[];
   url: string;
 }
+
+export enum HttpMethod {"GET", "POST", "PUT", "DELETE"}
 
 export interface IParams {
   name: string;
@@ -24,23 +27,21 @@ export interface IParams {
   type?: string;
   description?: string;
   required?: true;
-  schema?: string;
+  schema?: any;
 }
 
 export interface IPathsData {
   [url:string]: {
-    [httpMethod: string]: IHttpMethodDetail;
+    [httpMethod: string]: {
+      tags: string[],
+      operationId: string,
+      produces: string[],
+      consumes: string[],
+      summary: string,
+      description: string;
+      responses: any;
+      parameters: IParams[];
+      security?: any;
+    };
   }
-}
-
-export interface IHttpMethodDetail {
-  tags: string[],
-  operationId: string,
-  produces: string[],
-  consumes: string[],
-  summary: string,
-  description: string;
-  responses: any;
-  parameters: IParams[];
-  security?: any;
 }
