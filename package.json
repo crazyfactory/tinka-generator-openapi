@@ -7,9 +7,7 @@
     "start": "ts-node src/index.ts",
     "build": "webpack && npm run add-shebang",
     "test": "mocha -r ts-node/register src/**/*.test.ts",
-    "add-shebang": "ts-node src/addShebang.ts",
-    "generate-shop-api": "docker run --rm -t -v ${PWD}:/swagger swaggerapi/swagger-codegen-cli generate -i /swagger/spec.json -l typescript-fetch -o /swagger/sdk/shop-api-client -t /swagger/templates/typescript-fetch/",
-    "generate-shop-api:windows": "docker run --rm -t -v %cd%:/swagger swaggerapi/swagger-codegen-cli generate -i /swagger/spec.json -l typescript-fetch -o /swagger/sdk/shop-api-client -t /swagger/templates/typescript-fetch/"
+    "add-shebang": "ts-node src/addShebang.ts"
   },
   "bin": {
     "generate-api": "index.js"

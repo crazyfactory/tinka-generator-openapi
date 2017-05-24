@@ -8,7 +8,7 @@ program
   .option("-s, --spec [path]", "Spec file path")
   .parse(process.argv);
 
-if(program.lang === "typescript") {
+if (program.lang === "typescript") {
   new TypeScriptGenerator(program.spec ? `./${program.spec}` : `./spec.json`).generate();
 }
 else {
