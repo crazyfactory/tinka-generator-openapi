@@ -205,7 +205,7 @@ describe("TsControllerGenerator", () => {
 
       expect(code.toString()).to.equal(
         "public zonesUpdate(params: { id: number; data: Zones; contentType: string; }, options?: FetchRequest): Promise<ZonesDetail> {\n" +
-        "return this.client.process({...{ url: `/zones/${params.id}`, body: JSON.stringify({ ...params.data}), headers: { \"Content-Type\": params.contentType }, method: \"PUT\" }, ...options} as FetchRequest);\n" +
+        "  return this.client.process({...{ url: `/zones/${params.id}`, body: JSON.stringify({ ...params.data}), headers: { \"Content-Type\": params.contentType }, method: \"PUT\" }, ...options} as FetchRequest);\n" +
         "}"
       );
     });

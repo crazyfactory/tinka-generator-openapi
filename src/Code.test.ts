@@ -36,10 +36,10 @@ describe("Code", () => {
       secondChild.addChild(grandChild);
       expect(parent.toString()).to.equal(
         "for (let i = 0; i < 10; i++) {\n" +
-        "console.log('in the loop!');\n" +
-        "if (i === 5) {\n" +
-        "console.log('in the cond!');\n" +
-        "}\n" +
+        "  console.log('in the loop!');\n" +
+        "  if (i === 5) {\n" +
+        "    console.log('in the cond!');\n" +
+        "  }\n" +
         "}"
       );
     });

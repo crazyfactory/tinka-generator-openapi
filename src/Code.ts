@@ -19,8 +19,20 @@ export class Code implements ICode{
 
   public toString(): string {
     if (this.children.length > 0) {
-      return this.code + " {\n" + this.children.map(child => child.toString()).reduce((prev, curr) => prev + "\n" + curr) + "\n}";
+      let childrenString = this.children.map(child => child.toString()).reduce((prev, curr) => prev + "\n" + curr);
+      childrenString = this.addIndentation(childrenString, 2);
+      return this.code + " {\n" + childrenString + "\n}";
     }
     return this.code;
+  }
+
+  private addIndentation(str: string, numSpaces: number) {
+    let spaces = "";
+    for (let i = 0; i < numSpaces; i++) {
+      spaces += " ";
+    }
+    str = spaces + str;
+    str = str.replace(/\n/g, "\n" + spaces);
+    return str;
   }
 }
