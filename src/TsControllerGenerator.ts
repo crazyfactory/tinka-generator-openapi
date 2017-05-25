@@ -3,7 +3,7 @@ import {Code} from "./Code";
 
 export class TsControllerGenerator implements IGenerator {
   private apiControllers: IApiController[];
-
+  public prefix = "I";
   constructor(apiControllers: IApiController[]) {
     this.apiControllers = apiControllers;
   }
@@ -43,7 +43,7 @@ export class TsControllerGenerator implements IGenerator {
       paramsAndOptions = `options?: FetchRequest`;
     }
 
-    const returnType = apiMethod.returnType ? "Promise<" + apiMethod.returnType.toPascalCase() + ">" : "void";
+    const returnType = apiMethod.returnType ? "Promise<"+ this.prefix + apiMethod.returnType.toPascalCase() + ">" : "void";
     let parent: ICode = new Code(`public ${apiMethod.name.toCamelCase()}(${paramsAndOptions}): ${returnType}`);
     let fetchRequestString: string = `return this.client.process({...${this.getFetchRequestString(apiMethod)}, ...options} as FetchRequest);`;
     let child: ICode = new Code(fetchRequestString);

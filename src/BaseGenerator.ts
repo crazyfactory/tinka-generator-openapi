@@ -20,15 +20,11 @@ export abstract class BaseGenerator {
   }
 
   public generate() {
+    // todo: move this to TypeScriptGenerator.ts this belongs there. Not here.
     const interfaceString = this.generateInterfaces();
     const controllersString = this.generateControllers();
-
-    fs.writeFile("generated-api.ts", controllersString, (err) => {
-      if (err) throw err;
-      console.log("The file has been saved!");
-    });
-
-    fs.writeFile("generated-interface.ts", interfaceString, (err) => {
+    const sdk = interfaceString + controllersString;
+    fs.writeFile("sdk/sdk/sdk.ts", sdk, (err) => {
       if (err) throw err;
       console.log("The file has been saved!");
     });
