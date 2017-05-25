@@ -11,9 +11,9 @@ export class InterfaceGenerator implements IGenerator {
   }
 
   public generate() {
-    Object.keys(this.definitions).forEach((interfaceName) => {
-      console.log(this.generateInterfaceDefinition(interfaceName, this.definitions[interfaceName], this.prefixInterfaces));
-    })
+    return Object.keys(this.definitions).map((interfaceName) => {
+      return this.generateInterfaceDefinition(interfaceName, this.definitions[interfaceName], this.prefixInterfaces) + "\n\n";
+    }).join("\n");
   }
 
   public generateInterfaceDefinition(interfaceName: string, definition: any, prefixInterface: string = 'I') {
@@ -32,15 +32,18 @@ export class InterfaceGenerator implements IGenerator {
     let typeBody = [];
     // type is always object
     Object.keys(definition.properties).forEach(key => {
+      let required = (definition.required && definition.required.indexOf(key) !== -1)? '' : '?';
+      let doc = definition.properties[key].description ? InterfaceGenerator.getDocBlock(definition.properties[key].description): undefined;
+      typeBody = doc ? typeBody.concat(doc) : typeBody;
       if (definition.properties[key].type === 'array') {
-        typeBody = typeBody.concat(key + ": " + this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key].items["$ref"]) + "[]");
+        typeBody = typeBody.concat(key + required + ": " + this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key].items["$ref"]) + "[]" + ",");
       } else if (definition.properties[key]["$ref"]) {
-        typeBody = typeBody.concat(key + ": " + this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key]["$ref"]));
+        typeBody = typeBody.concat(key + required + ": " + this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key]["$ref"]) + ",");
       } else {
-        typeBody = typeBody.concat(key + ": " + InterfaceGenerator.transformTypes(definition.properties[key].type !== "object" ? definition.properties[key].type : "any"));
+        typeBody = typeBody.concat(key + required + ": " + InterfaceGenerator.transformTypes(definition.properties[key].type !== "object" ? definition.properties[key].type : "any") + ",");
       }
     });
-    return typeBody.join(",\n");
+    return typeBody.join("\n\n");
   }
 
   public static getInterfaceFromReference(ref: string) {

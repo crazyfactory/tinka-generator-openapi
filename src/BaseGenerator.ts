@@ -20,10 +20,15 @@ export abstract class BaseGenerator {
   }
 
   public generate() {
-    // this.generateInterfaces();
+    const interfaceString = this.generateInterfaces();
     const controllersString = this.generateControllers();
 
     fs.writeFile("generated-api.ts", controllersString, (err) => {
+      if (err) throw err;
+      console.log("The file has been saved!");
+    });
+
+    fs.writeFile("generated-interface.ts", interfaceString, (err) => {
       if (err) throw err;
       console.log("The file has been saved!");
     });
