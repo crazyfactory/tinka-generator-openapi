@@ -1,4 +1,4 @@
 {DESCRIPTION}
-interface {NAME} {
+export interface {NAME} {
 {BODY}
 }

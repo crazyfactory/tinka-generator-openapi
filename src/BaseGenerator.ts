@@ -24,9 +24,11 @@ export abstract class BaseGenerator {
     const interfaceString = this.generateInterfaces();
     const controllersString = this.generateControllers();
     const sdk = interfaceString + controllersString;
-    fs.writeFile("sdk/sdk/sdk.ts", sdk, (err) => {
+    fs.writeFile("sdk/TypeScript/src/sdk.ts", sdk, (err) => {
       if (err) throw err;
       console.log("The file has been saved!");
     });
+    fs.writeFileSync("sdk/TypeScript/package.json", fs.readFileSync(path.resolve("./src/package.stub")));
+    fs.writeFileSync("sdk/TypeScript/tsconfig.json", fs.readFileSync(path.resolve("./src/tsconfig.stub")));
   }
 }

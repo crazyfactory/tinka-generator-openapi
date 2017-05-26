@@ -8,7 +8,7 @@
     "build": "webpack && npm run add-shebang",
     "test": "mocha -r ts-node/register src/**/*.test.ts",
     "add-shebang": "ts-node src/addShebang.ts",
-    "format": "tsfmt -r ./sdk.ts"
+    "format": "tsfmt -r ./sdk/TypeScript/src/sdk.ts"
   },
   "bin": {
     "generate-api": "index.js"
