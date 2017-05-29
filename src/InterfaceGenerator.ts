@@ -5,15 +5,15 @@ import {IGenerator} from "./interfaces";
 export class InterfaceGenerator implements IGenerator {
   private definitions;
 
-  // todo: cleanup code, add required attributes, add description docs
+  // todo: cleanup code, add description docs
   constructor(data: any, private prefixInterfaces: string = 'I') {
     this.definitions = data.definitions;
   }
 
   public generate() {
     return Object.keys(this.definitions).map((interfaceName) => {
-      return this.generateInterfaceDefinition(interfaceName, this.definitions[interfaceName], this.prefixInterfaces) + "\n\n";
-    }).join("\n");
+      return this.generateInterfaceDefinition(interfaceName, this.definitions[interfaceName], this.prefixInterfaces) + "\n";
+    }).join("\n\n");
   }
 
   public generateInterfaceDefinition(interfaceName: string, definition: any, prefixInterface: string = 'I') {
@@ -32,8 +32,8 @@ export class InterfaceGenerator implements IGenerator {
     let typeBody = [];
     // type is always object
     Object.keys(definition.properties).forEach(key => {
-      let required = (definition.required && definition.required.indexOf(key) !== -1)? '' : '?';
-      let doc = definition.properties[key].description ? InterfaceGenerator.getDocBlock(definition.properties[key].description): undefined;
+      let required = (definition.required && definition.required.indexOf(key) !== -1) ? '' : '?';
+      let doc = definition.properties[key].description ? InterfaceGenerator.getDocBlock(definition.properties[key].description) : undefined;
       typeBody = doc ? typeBody.concat(doc) : typeBody;
       if (definition.properties[key].type === 'array') {
         typeBody = typeBody.concat(key + required + ": " + this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key].items["$ref"]) + "[]" + ",");

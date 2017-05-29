@@ -124,17 +124,17 @@ describe("TsControllerGenerator", () => {
     methods: [zonesUpdateMethod, zonesDeleteMethod]
   }
 
-  describe("generateApiControllerCodes()", () => {
+  describe("generateApiControllerNodes()", () => {
     let codes: ICode[];
 
     beforeEach(() => {
       const gen = new TsControllerGenerator([categoriesController, zonesController]);
-      codes = gen.generateApiControllerCodes();
+      codes = gen.generateApiControllerNodes();
     });
 
     it("writes first line of class correctly", () => {
       const firstControllerString = codes[0].toString();
-      expect(firstControllerString.substr(0, firstControllerString.indexOf("\n"))).equal("export class Categories extends BaseAPI {");
+      expect(firstControllerString.substr(0, firstControllerString.indexOf("\n"))).equal("export class CategoriesNode extends Service {");
     });
 
     it("contains correct number of controller codes", () => {
@@ -204,7 +204,7 @@ describe("TsControllerGenerator", () => {
       const code: ICode = gen.generateApiMethodCode(apiMethod);
 
       expect(code.toString()).to.equal(
-        "public zonesUpdate(params: { id: number; data: Zones; contentType: string; }, options?: FetchRequest): Promise<ZonesDetail> {\n" +
+        "public zonesUpdate(params: { id: number; data: IZones; contentType: string; }, options?: FetchRequest): Promise<IZonesDetail> {\n" +
         "  return this.client.process({...{ url: `/zones/${params.id}`, body: JSON.stringify({ ...params.data}), headers: { \"Content-Type\": params.contentType }, method: \"PUT\" }, ...options} as FetchRequest);\n" +
         "}"
       );
@@ -263,7 +263,7 @@ describe("TsControllerGenerator", () => {
           "required": true
         }
       ];
-      expect(gen.getParamsDefinition(allParams)).to.equal(`{ id: number; data: Zones; authorization: string; contentType: string; search: string; }`);
+      expect(TsControllerGenerator.getParamsDefinition(allParams)).to.equal(`{ id: number; data: IZones; authorization: string; contentType: string; search: string; }`);
     });
   });
 

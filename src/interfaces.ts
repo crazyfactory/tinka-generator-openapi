@@ -21,7 +21,7 @@ export interface IApiMethod {
   url: string;
 }
 
-export enum HttpMethod {"GET", "POST", "PUT", "DELETE"}
+export enum HttpMethod {"GET", "POST", "PUT", "DELETE", "PATCH"}
 
 export interface IParams {
   name: string;

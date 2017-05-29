@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as path from "path";
 import {HttpMethod, IApiController, IApiMethod, ICode, IGenerator, IParams} from "./interfaces";
 import {Code} from "./Code";
 
@@ -14,17 +16,26 @@ export class TsControllerGenerator implements IGenerator {
 
   public generateString(): string {
     let codeString: string = "";
-    const codes: ICode[] = this.generateApiControllerCodes();
+    const codes: ICode[] = this.generateApiControllerNodes();
     for(let code of codes) {
       codeString += code.toString() + "\n";
     }
-    return codeString;
+    return codeString + this.generateControllerService();
+  }
+  public generateControllerService()
+  {
+    const shopServiceStub = fs.readFileSync(path.resolve("./src/shop_service.stub")).toString();
+    const serviceStub = fs.readFileSync(path.resolve("./src/service_method.stub")).toString();
+    return shopServiceStub.replace("{DEFINITION}", this.apiControllers.map(api => {
+      // replace doesn't replace all occurrence, so use regular expression (since this is not on production, we don't need to worry about performance)
+      return serviceStub.replace("{CONTROLLER}", api.name).replace(new RegExp("{CONTROLLER_NODE}", "g"), api.name.toPascalCase() + "Node");//api.name;
+    }).join("\n"));
   }
 
-  public generateApiControllerCodes(): ICode[] {
+  public generateApiControllerNodes(): ICode[] {
     let controllerCodes: ICode[] = [];
     for (let apiController of this.apiControllers) {
-      let controllerCode: ICode = new Code(`export class ${apiController.name.toPascalCase()} extends BaseAPI`);
+      let controllerCode: ICode = new Code(`export class ${apiController.name.toPascalCase()}Node extends Service`);
       for (let apiMethod of apiController.methods) {
         controllerCode.addChild(this.generateApiMethodCode(apiMethod));
       }
@@ -36,7 +47,7 @@ export class TsControllerGenerator implements IGenerator {
   public generateApiMethodCode(apiMethod: IApiMethod): ICode {
     let paramsAndOptions: string = "";
     if (apiMethod.allParams.length) {
-      const paramsDef = this.getParamsDefinition(apiMethod.allParams);
+      const paramsDef = TsControllerGenerator.getParamsDefinition(apiMethod.allParams);
       paramsAndOptions = `params: ${paramsDef}, options?: FetchRequest`;
     }
     else {
@@ -51,11 +62,11 @@ export class TsControllerGenerator implements IGenerator {
     return parent;
   }
 
-  public getParamsDefinition(params: IParams[]): string {
+  public static getParamsDefinition(params: IParams[], interfacePrefix: string = "I"): string {
     let paramsDef: string = "{";
     for (let param of params) {
       if (param.type === "integer") param.type = "number";
-      paramsDef += ` ${param.name.toCamelCase()}: ${param.type || param.schema.toPascalCase()};`;
+      paramsDef += ` ${param.name.toCamelCase()}: ${param.type || interfacePrefix + param.schema.toPascalCase()};`;
     }
     paramsDef += " }";
     return paramsDef;

@@ -92,6 +92,8 @@ export class GeneratorHelpers {
         return HttpMethod.POST;
       case "PUT":
         return HttpMethod.PUT;
+      case "PATCH":
+        return HttpMethod.PATCH;
       case "DELETE":
         return HttpMethod.DELETE;
       default:
