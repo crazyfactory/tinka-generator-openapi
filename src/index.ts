@@ -1,5 +1,5 @@
 require("./StringHelpers");
-import {TypeScriptGenerator} from "./TypeScriptGenerator";
+import {TypeScriptGenerator} from "./TypeScriptGenerator/TypeScriptGenerator";
 
 let program = require("commander");
 program

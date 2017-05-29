@@ -1,4 +1,4 @@
-import {TypeScriptGenerator} from "./TypeScriptGenerator";
+import {TypeScriptGenerator} from "./TypeScriptGenerator/TypeScriptGenerator";
 import {expect} from 'chai';
 
 describe('Hello function', () => {

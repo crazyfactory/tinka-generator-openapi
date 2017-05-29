@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {TsControllerGenerator} from "./TsControllerGenerator";
-import {HttpMethod, IApiMethod, ICode, IParams, IApiController} from "./interfaces";
-import {ApiMethod} from "./models/ApiMethod";
+import {HttpMethod, IApiMethod, ICode, IParams, IApiController} from "../interfaces";
+import {ApiMethod} from "../models/ApiMethod";
 
 describe("TsControllerGenerator", () => {
   const categoriesListMethod: IApiMethod = {

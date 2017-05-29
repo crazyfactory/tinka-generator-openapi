@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import {HttpMethod, IApiController, IApiMethod, ICode, IGenerator, IParams} from "./interfaces";
-import {Code} from "./Code";
+import {HttpMethod, IApiController, IApiMethod, ICode, IGenerator, IParams} from "../interfaces";
+import {Code} from "../Code";
 
 export class TsControllerGenerator implements IGenerator {
   private apiControllers: IApiController[];
@@ -24,8 +24,8 @@ export class TsControllerGenerator implements IGenerator {
   }
   public generateControllerService()
   {
-    const shopServiceStub = fs.readFileSync(path.resolve("./src/shop_service.stub")).toString();
-    const serviceStub = fs.readFileSync(path.resolve("./src/service_method.stub")).toString();
+    const shopServiceStub = fs.readFileSync(path.resolve("./src/TypeScriptGenerator/stubs/shop_service.stub")).toString();
+    const serviceStub = fs.readFileSync(path.resolve("./src/TypeScriptGenerator/stubs/service_method.stub")).toString();
     return shopServiceStub.replace("{DEFINITION}", this.apiControllers.map(api => {
       // replace doesn't replace all occurrence, so use regular expression (since this is not on production, we don't need to worry about performance)
       return serviceStub.replace("{CONTROLLER}", api.name).replace(new RegExp("{CONTROLLER_NODE}", "g"), api.name.toPascalCase() + "Node");//api.name;
