@@ -15,7 +15,8 @@ export class TypeScriptGenerator extends BaseGenerator {
   public generate() {
     const interfaceString = this.generateModels();
     const controllersString = this.generateApis();
-    const sdk = interfaceString + controllersString;
+    const sdk_stub = fs.readFileSync(path.resolve("./src/TypeScriptGenerator/stubs/sdk.ts.stub")).toString();
+    const sdk = sdk_stub.replace("{SDK_BODY}", interfaceString + controllersString);
     fs.writeFileSync("sdk/TypeScript/src/sdk.ts", sdk);
     this.bundle();
     console.log("Sdk generate, you can run npm install && npm run build && npm publish");
