@@ -1,3 +1,4 @@
+require("./StringHelpers");
 import {GeneratorHelpers} from "./GeneratorHelpers";
 import {expect} from 'chai';
 import {IPathsData, IApiController, IApiMethod, HttpMethod} from "./interfaces";

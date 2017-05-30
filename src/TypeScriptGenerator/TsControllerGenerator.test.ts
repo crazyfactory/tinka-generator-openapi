@@ -1,3 +1,4 @@
+require("../StringHelpers");
 import {expect} from "chai";
 import {TsControllerGenerator} from "./TsControllerGenerator";
 import {HttpMethod, IApiMethod, ICode, IParams, IApiController} from "../interfaces";
@@ -204,8 +205,8 @@ describe("TsControllerGenerator", () => {
       const code: ICode = gen.generateApiMethodCode(apiMethod);
 
       expect(code.toString()).to.equal(
-        "public zonesUpdate(params: { id: number; data: IZones; contentType: string; }, options?: FetchRequest): Promise<IZonesDetail> {\n" +
-        "  return this.client.process({...{ url: `/zones/${params.id}`, body: JSON.stringify({ ...params.data}), headers: { \"Content-Type\": params.contentType }, method: \"PUT\" }, ...options} as FetchRequest);\n" +
+        "public zonesUpdate(params: { id: number; data: IZones; contentType: string; }, options?: IFetchRequest): Promise<IZonesDetail> {\n" +
+        "  return this.client.process({...{ url: `/zones/${params.id}`, body: JSON.stringify({ ...params.data}), headers: { \"Content-Type\": params.contentType }, method: \"PUT\" }, ...options} as IFetchRequest);\n" +
         "}"
       );
     });
@@ -213,13 +214,13 @@ describe("TsControllerGenerator", () => {
     it("does not write params if params are empty", () => {
       const gen = new TsControllerGenerator([]);
       const code: ICode = gen.generateApiMethodCode(categoriesListMethod);
-      expect(code.toString()).to.contains("public categoriesList(options?: FetchRequest):");
+      expect(code.toString()).to.contains("public categoriesList(options?: IFetchRequest):");
     });
 
     it("sets return type to void if returnType is null", () => {
       const gen = new TsControllerGenerator([]);
       const code: ICode = gen.generateApiMethodCode(zonesDeleteMethod);
-      expect(code.toString()).to.contains("options?: FetchRequest): void {");
+      expect(code.toString()).to.contains("options?: IFetchRequest): void {");
     });
   });
 

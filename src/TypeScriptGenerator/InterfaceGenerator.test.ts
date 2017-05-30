@@ -1,3 +1,4 @@
+require("../StringHelpers");
 import {InterfaceGenerator} from "./InterfaceGenerator";
 import {expect} from 'chai';
 
