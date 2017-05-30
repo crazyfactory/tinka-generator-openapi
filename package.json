@@ -3,11 +3,12 @@
   "description": "This repo takes a spec file and generate ts-http-client sdk",
   "main": "index.js",
   "scripts": {
-    "generate:typescript": "ts-node src/index.ts --lang=typescript",
-    "build": "webpack && npm run add-shebang",
-    "test": "mocha -r ts-node/register src/**/*.test.ts",
     "add-shebang": "ts-node src/addShebang.ts",
-    "format": "tsfmt -r ./sdk/TypeScript/src/sdk.ts"
+    "build": "webpack && npm run add-shebang",
+    "format": "tsfmt -r ./sdk/TypeScript/src/sdk.ts",
+    "generate:typescript": "ts-node src/index.ts --lang=typescript",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "test": "mocha -r ts-node/register src/**/*.test.ts"
   },
   "bin": {
     "generate-api": "./cli/index.js"
@@ -30,6 +31,7 @@
     "babel-core": "^6.24.1",
     "chai": "^3.5.0",
     "mocha": "^3.4.1",
+    "semantic-release": "^6.3.6",
     "ts-node": "^3.0.4",
     "typescript": "^2.3.2",
     "webpack": "^2.6.0"
