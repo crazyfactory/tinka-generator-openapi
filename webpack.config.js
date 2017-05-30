@@ -13,7 +13,7 @@ var config = {
   entry: "./src/index.ts",
 
   output: {
-    filename: "index.js"
+    filename: "cli/index.js"
   },
   target: "node",
   module: {

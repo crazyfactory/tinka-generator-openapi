@@ -1,5 +1,3 @@
-import * as fs from "fs";
-import * as path from "path";
 import {IGenerator} from "../interfaces";
 
 export class InterfaceGenerator implements IGenerator {
@@ -18,9 +16,7 @@ export class InterfaceGenerator implements IGenerator {
 
   public generateInterfaceDefinition(interfaceName: string, definition: any, prefixInterface: string = 'I') {
     interfaceName = prefixInterface + InterfaceGenerator.toPascalCase(interfaceName);
-    let interfaceDefinition = fs.readFileSync(path.resolve("./src/TypeScriptGenerator/stubs/interface.stub")).toString();
-
-    // console.log(interfaceName);
+    let interfaceDefinition = InterfaceGenerator.getInterfaceStub();
     const docBlock = definition.description ? InterfaceGenerator.getDocBlock(definition.description) : '';
     return interfaceDefinition
       .replace("{NAME}", interfaceName)
@@ -62,14 +58,19 @@ export class InterfaceGenerator implements IGenerator {
     }
   }
 
-  public static getDocBlock(description) {
-    return fs.readFileSync(path.resolve("./src/TypeScriptGenerator/stubs/docblock.stub")).toString().replace("{DESCRIPTION}", description);
-  }
-
   public static toPascalCase(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1).replace(/(\_\w)/g, function (m) {
       return m[1].toUpperCase();
     });
+  }
+
+  // dirty methods start
+  public static getInterfaceStub(): string {
+    return `\{DESCRIPTION} \nexport interface \{NAME} \{\n\{BODY}\n}`
+  }
+
+  public static getDocBlock(description): string {
+    return `/**\n${description}\n*/`;
   }
 
 }

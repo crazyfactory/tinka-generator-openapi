@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {HttpMethod, IApiController, IApiMethod, ICode, IGenerator, IParams} from "../interfaces";
 import {Code} from "../Code";
+import {TypeScriptGenerator} from "./TypeScriptGenerator";
 
 export class TsControllerGenerator implements IGenerator {
   private apiControllers: IApiController[];
@@ -24,11 +25,11 @@ export class TsControllerGenerator implements IGenerator {
   }
   public generateControllerService()
   {
-    const shopServiceStub = fs.readFileSync(path.resolve("./src/TypeScriptGenerator/stubs/shop_service.stub")).toString();
-    const serviceStub = fs.readFileSync(path.resolve("./src/TypeScriptGenerator/stubs/service_method.stub")).toString();
+    const shopServiceStub = TsControllerGenerator.getServiceStub();
+    const serviceMethodStub = TsControllerGenerator.getServiceMethodStub();
     return shopServiceStub.replace("{DEFINITION}", this.apiControllers.map(api => {
       // replace doesn't replace all occurrence, so use regular expression (since this is not on production, we don't need to worry about performance)
-      return serviceStub.replace("{CONTROLLER}", api.name).replace(new RegExp("{CONTROLLER_NODE}", "g"), api.name.toPascalCase() + "Node");//api.name;
+      return serviceMethodStub.replace("{CONTROLLER}", api.name).replace(new RegExp("{CONTROLLER_NODE}", "g"), api.name.toPascalCase() + "Node");//api.name;
     }).join("\n"));
   }
 
@@ -125,5 +126,13 @@ export class TsControllerGenerator implements IGenerator {
     result = result.substr(0, result.length - 1);
     result += " }";
     return result;
+  }
+  // dirty methods start
+  public static getServiceMethodStub() {
+    return 'get {CONTROLLER}(): {CONTROLLER_NODE} {\n  return new {CONTROLLER_NODE}(this.client);\n}\n';
+  }
+
+  public static getServiceStub() {
+    return 'export class ShopService extends Service {\n{DEFINITION}\n}\n';
   }
 }

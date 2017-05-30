@@ -11,7 +11,7 @@
     "format": "tsfmt -r ./sdk/TypeScript/src/sdk.ts"
   },
   "bin": {
-    "generate-api": "index.js"
+    "generate-api": "./cli/index.js"
   },
   "repository": {
     "type": "git",
@@ -36,8 +36,6 @@
     "webpack": "^2.6.0"
   },
   "dependencies": {
-    "commander": "^2.9.0",
-    "typescript-formatter": "^5.2.0",
-    "npm-run": "^4.1.2"
+    "commander": "^2.9.0"
   }
 }
