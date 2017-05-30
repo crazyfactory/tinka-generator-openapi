@@ -1,6 +1,5 @@
 {
-  "name": "tinka-generator-openapi",
-  "version": "1.0.0",
+  "name": "@crazyfactory/tinka-generator-openapi",
   "description": "This repo takes a spec file and generate ts-http-client sdk",
   "main": "index.js",
   "scripts": {
