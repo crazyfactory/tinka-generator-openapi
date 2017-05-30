@@ -1,0 +1,4 @@
+{DESCRIPTION}
+export interface {NAME} {
+{BODY}
+}
