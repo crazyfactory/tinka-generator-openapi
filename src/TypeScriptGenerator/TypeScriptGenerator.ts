@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as npmRun from 'npm-run';
 
 import {BaseGenerator} from "../BaseGenerator";
 import {InterfaceGenerator} from "./InterfaceGenerator";
@@ -19,7 +20,8 @@ export class TypeScriptGenerator extends BaseGenerator {
     const sdk = sdk_stub.replace("{SDK_BODY}", interfaceString + controllersString);
     fs.writeFileSync("sdk/TypeScript/src/sdk.ts", sdk);
     this.bundle();
-    console.log("Sdk generate, you can run npm install && npm run build && npm publish");
+    npmRun.execSync("tsfmt -r ./sdk/TypeScript/src/sdk.ts");
+    console.log("Sdk generated, you can now `run npm install && npm run build && npm publish`");
   }
 
   protected generateModels() {

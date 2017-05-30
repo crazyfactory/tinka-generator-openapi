@@ -4,7 +4,7 @@
   "description": "This repo takes a spec file and generate ts-http-client sdk",
   "main": "index.js",
   "scripts": {
-    "generate:typescript": "ts-node src/index.ts --lang=typescript && npm run format",
+    "generate:typescript": "ts-node src/index.ts --lang=typescript",
     "build": "webpack && npm run add-shebang",
     "test": "mocha -r ts-node/register src/**/*.test.ts",
     "add-shebang": "ts-node src/addShebang.ts",
@@ -33,10 +33,11 @@
     "mocha": "^3.4.1",
     "ts-node": "^3.0.4",
     "typescript": "^2.3.2",
-    "typescript-formatter": "^5.2.0",
     "webpack": "^2.6.0"
   },
   "dependencies": {
-    "commander": "^2.9.0"
+    "commander": "^2.9.0",
+    "typescript-formatter": "^5.2.0",
+    "npm-run": "^4.1.2"
   }
 }
