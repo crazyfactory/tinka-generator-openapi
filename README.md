@@ -1,4 +1,6 @@
 # tinka-generator-openapi
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/crazyfactory/tinka-generator-openapi.svg)](https://greenkeeper.io/)
 This repo takes a spec file and generate ts-http-client sdk
 
 In crazy factory, we have  
