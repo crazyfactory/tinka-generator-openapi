@@ -1,3 +1,0 @@
-export class ShopService extends Service {
-{DEFINITION}
-}
