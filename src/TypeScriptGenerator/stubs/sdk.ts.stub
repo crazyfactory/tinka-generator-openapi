@@ -1,2 +1,0 @@
-import {IFetchRequest, Service} from "@crazyfactory/tinka";
-{SDK_BODY}

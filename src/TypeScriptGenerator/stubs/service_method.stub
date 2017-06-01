@@ -1,3 +1,0 @@
-get {CONTROLLER}(): {CONTROLLER_NODE} {
-    return new {CONTROLLER_NODE}(this.client);
-}
