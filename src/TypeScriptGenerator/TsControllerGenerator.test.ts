@@ -91,7 +91,7 @@ describe("TsControllerGenerator", () => {
   const zonesDeleteMethod: IApiMethod = {
     name: "zones-delete",
     classNames: ["zones"],
-    returnType: null,
+    returnType: "void",
     httpMethod: HttpMethod.DELETE,
     allParams: [
       {
@@ -119,11 +119,11 @@ describe("TsControllerGenerator", () => {
   const categoriesController: IApiController = {
     name: "categories",
     methods: [categoriesListMethod, categoriesDetailMethod]
-  }
+  };
   const zonesController: IApiController = {
     name: "zones",
     methods: [zonesUpdateMethod, zonesDeleteMethod]
-  }
+  };
 
   describe("generateApiControllerNodes()", () => {
     let codes: ICode[];
@@ -215,12 +215,6 @@ describe("TsControllerGenerator", () => {
       const gen = new TsControllerGenerator([]);
       const code: ICode = gen.generateApiMethodCode(categoriesListMethod);
       expect(code.toString()).to.contains("public categoriesList(options?: IFetchRequest):");
-    });
-
-    it("sets return type to void if returnType is null", () => {
-      const gen = new TsControllerGenerator([]);
-      const code: ICode = gen.generateApiMethodCode(zonesDeleteMethod);
-      expect(code.toString()).to.contains("options?: IFetchRequest): void {");
     });
   });
 
