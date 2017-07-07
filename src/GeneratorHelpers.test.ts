@@ -955,7 +955,7 @@ describe("GeneratorHelpers", () => {
         }
       };
       expect(GeneratorHelpers.getApiMethods.bind(GeneratorHelpers, localPaths)).to.throw(
-        "This api method products-list does not define response 200, 201, or 204."
+        "This api method products-list does not define response for success status"
       );
     });
     it("throws unknown param", () => {
