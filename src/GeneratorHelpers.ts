@@ -52,6 +52,9 @@ export class GeneratorHelpers {
         else if (responses["204"]) {
           method.returnType = "void";
         }
+        else {
+          throw new Error(`This api method ${method.name} does not define response 200 or 204.`)
+        }
 
         method.httpMethod = this.cleanHttpMethod(httpMethod);
         method.allParams = paths[url][httpMethod].parameters;

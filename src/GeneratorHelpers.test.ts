@@ -915,6 +915,45 @@ describe("GeneratorHelpers", () => {
         required: true
       }]);
     });
+    it("throws missing response 200 or 204", () => {
+      const localPaths: IPathsData = {
+        "/products": {
+          "get": {
+            "tags": [
+              "products"
+            ],
+            "operationId": "products-list",
+            "produces": [
+              "application/json"
+            ],
+            "consumes": [
+              "application/json"
+            ],
+            "summary": "",
+            "description": "Products list response payload",
+            "responses": {
+              "500": {
+                "description": "Error response",
+                "schema": {
+                  "$ref":"#/definitions/error_response"
+                }
+              }
+            },
+            "parameters": [],
+            "security": [
+              {
+                "bearer": [
+                  "user"
+                ]
+              }
+            ]
+          }
+        }
+      };
+      expect(GeneratorHelpers.getApiMethods.bind(GeneratorHelpers, localPaths)).to.throw(
+        "This api method products-list does not define response 200 or 204."
+      );
+    });
     it("throws unknown param", () => {
       const localPaths: IPathsData = {
         "/auth": {
@@ -975,7 +1014,7 @@ describe("GeneratorHelpers", () => {
         }
       };
       expect(GeneratorHelpers.getApiMethods.bind(GeneratorHelpers, localPaths)).to.throw("Unknown param type -> ABC");
-    })
+    });
     it("returns correct method's url", () => {
       expect(methods[11].url).to.equal("/zones/{id}");
     });
