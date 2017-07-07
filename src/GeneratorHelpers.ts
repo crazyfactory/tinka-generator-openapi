@@ -49,6 +49,9 @@ export class GeneratorHelpers {
           const returnTypeRef = responses["200"]["schema"]["$ref"];
           method.returnType = returnTypeRef.substr(returnTypeRef.lastIndexOf("/") + 1);
         }
+        else if (responses["204"]) {
+          method.returnType = "void";
+        }
 
         method.httpMethod = this.cleanHttpMethod(httpMethod);
         method.allParams = paths[url][httpMethod].parameters;

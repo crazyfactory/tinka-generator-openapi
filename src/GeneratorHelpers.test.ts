@@ -858,7 +858,7 @@ describe("GeneratorHelpers", () => {
     });
     it("returns correct method's returnType", () => {
       expect(methods[0].returnType).to.equal("authentication");
-      expect(methods[11].returnType).to.equal(null);
+      expect(methods[11].returnType).to.equal("void");
     });
     it("returns correct method's httpMethod", () => {
       expect(methods[8].httpMethod).to.equal(HttpMethod.POST);
