@@ -45,15 +45,15 @@ export class GeneratorHelpers {
         method.classNames = paths[url][httpMethod].tags;
 
         const responses = paths[url][httpMethod].responses;
-        if (responses["200"]) {
-          const returnTypeRef = responses["200"]["schema"]["$ref"];
+        if (responses["200"] || responses["201"]) {
+          const returnTypeRef = responses["200"] ? responses["200"]["schema"]["$ref"] : responses["201"]["schema"]["$ref"];
           method.returnType = returnTypeRef.substr(returnTypeRef.lastIndexOf("/") + 1);
         }
         else if (responses["204"]) {
           method.returnType = "void";
         }
         else {
-          throw new Error(`This api method ${method.name} does not define response 200 or 204.`)
+          throw new Error(`This api method ${method.name} does not define response 200, 201, or 204.`)
         }
 
         method.httpMethod = this.cleanHttpMethod(httpMethod);

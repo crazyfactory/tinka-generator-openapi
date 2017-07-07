@@ -449,7 +449,7 @@ describe("GeneratorHelpers", () => {
         "summary": "",
         "description": "Zone details response payload",
         "responses": {
-          "200": {
+          "201": {
             "description": "Zone details response payload",
             "schema": {
               "$ref":"#/definitions/zones_detail"
@@ -857,7 +857,11 @@ describe("GeneratorHelpers", () => {
       expect(methods[0].classNames).to.deep.equal(["auth"]);
     });
     it("returns correct method's returnType", () => {
-      expect(methods[0].returnType).to.equal("authentication");
+      // 200 response
+      expect(methods[7].returnType).to.equal("zones_list");
+      // 201 response
+      expect(methods[8].returnType).to.equal("zones_detail");
+      // 204 response
       expect(methods[11].returnType).to.equal("void");
     });
     it("returns correct method's httpMethod", () => {
@@ -915,7 +919,7 @@ describe("GeneratorHelpers", () => {
         required: true
       }]);
     });
-    it("throws missing response 200 or 204", () => {
+    it("throws missing response", () => {
       const localPaths: IPathsData = {
         "/products": {
           "get": {
@@ -951,7 +955,7 @@ describe("GeneratorHelpers", () => {
         }
       };
       expect(GeneratorHelpers.getApiMethods.bind(GeneratorHelpers, localPaths)).to.throw(
-        "This api method products-list does not define response 200 or 204."
+        "This api method products-list does not define response 200, 201, or 204."
       );
     });
     it("throws unknown param", () => {
