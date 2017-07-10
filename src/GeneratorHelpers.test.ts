@@ -449,7 +449,7 @@ describe("GeneratorHelpers", () => {
         "summary": "",
         "description": "Zone details response payload",
         "responses": {
-          "200": {
+          "201": {
             "description": "Zone details response payload",
             "schema": {
               "$ref":"#/definitions/zones_detail"
@@ -857,8 +857,12 @@ describe("GeneratorHelpers", () => {
       expect(methods[0].classNames).to.deep.equal(["auth"]);
     });
     it("returns correct method's returnType", () => {
-      expect(methods[0].returnType).to.equal("authentication");
-      expect(methods[11].returnType).to.equal(null);
+      // 200 response
+      expect(methods[7].returnType).to.equal("zones_list");
+      // 201 response
+      expect(methods[8].returnType).to.equal("zones_detail");
+      // 204 response
+      expect(methods[11].returnType).to.equal("void");
     });
     it("returns correct method's httpMethod", () => {
       expect(methods[8].httpMethod).to.equal(HttpMethod.POST);
@@ -914,6 +918,45 @@ describe("GeneratorHelpers", () => {
         description: "Refresh token",
         required: true
       }]);
+    });
+    it("throws missing response", () => {
+      const localPaths: IPathsData = {
+        "/products": {
+          "get": {
+            "tags": [
+              "products"
+            ],
+            "operationId": "products-list",
+            "produces": [
+              "application/json"
+            ],
+            "consumes": [
+              "application/json"
+            ],
+            "summary": "",
+            "description": "Products list response payload",
+            "responses": {
+              "500": {
+                "description": "Error response",
+                "schema": {
+                  "$ref":"#/definitions/error_response"
+                }
+              }
+            },
+            "parameters": [],
+            "security": [
+              {
+                "bearer": [
+                  "user"
+                ]
+              }
+            ]
+          }
+        }
+      };
+      expect(GeneratorHelpers.getApiMethods.bind(GeneratorHelpers, localPaths)).to.throw(
+        "This api method products-list does not define response for success status"
+      );
     });
     it("throws unknown param", () => {
       const localPaths: IPathsData = {
@@ -975,7 +1018,7 @@ describe("GeneratorHelpers", () => {
         }
       };
       expect(GeneratorHelpers.getApiMethods.bind(GeneratorHelpers, localPaths)).to.throw("Unknown param type -> ABC");
-    })
+    });
     it("returns correct method's url", () => {
       expect(methods[11].url).to.equal("/zones/{id}");
     });

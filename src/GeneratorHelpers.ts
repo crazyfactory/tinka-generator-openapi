@@ -45,9 +45,23 @@ export class GeneratorHelpers {
         method.classNames = paths[url][httpMethod].tags;
 
         const responses = paths[url][httpMethod].responses;
-        if (responses["200"]) {
-          const returnTypeRef = responses["200"]["schema"]["$ref"];
-          method.returnType = returnTypeRef.substr(returnTypeRef.lastIndexOf("/") + 1);
+        const successCodes = ["200", "201", "202", "203", "204", "205", "206", "207", "208", "226"];
+        
+        for (const successCode of successCodes) {
+          if (responses[successCode]) {
+            if (successCode === "204") {
+              method.returnType = "void";
+            }
+            else {
+              const returnTypeRef = responses[successCode]["schema"]["$ref"];
+              method.returnType = returnTypeRef.substr(returnTypeRef.lastIndexOf("/") + 1);
+            }
+            break;
+          }
+        }
+
+        if (!method.returnType) {
+          throw new Error(`This api method ${method.name} does not define response for success status`);
         }
 
         method.httpMethod = this.cleanHttpMethod(httpMethod);
