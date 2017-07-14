@@ -8,7 +8,22 @@
     "format": "tsfmt -r ./sdk/TypeScript/src/sdk.ts",
     "generate:typescript": "ts-node src/index.ts --lang=typescript",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
-    "test": "mocha -r ts-node/register src/**/*.test.ts"
+    "test": "nyc mocha --compilers ts:ts-node/register src/**/*.test.ts"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "src/**/*.test.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "reporter": [
+      "lcov"
+    ],
+    "all": true
   },
   "bin": {
     "generate-api": "./cli/index.js"
@@ -31,6 +46,7 @@
     "babel-core": "^6.24.1",
     "chai": "^4.0.0",
     "mocha": "^3.4.1",
+    "nyc": "^11.0.3",
     "semantic-release": "^6.3.6",
     "ts-node": "^3.0.4",
     "typescript": "^2.3.2",
