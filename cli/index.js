@@ -34,9 +34,6 @@
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -64,7 +61,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -75,6 +72,12 @@ module.exports = require("fs");
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -91,13 +94,25 @@ var HttpMethod;
 })(HttpMethod = exports.HttpMethod || (exports.HttpMethod = {}));
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports) {
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = require("path");
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(4);
+var TypeScriptGenerator_1 = __webpack_require__(5);
+var program = __webpack_require__(12);
+program.version('0.0.1').option("-l, --lang [type]", "Language").option("-s, --spec [path]", "Spec file path").parse(process.argv);
+if (program.lang === "typescript") {
+    new TypeScriptGenerator_1.TypeScriptGenerator(program.spec ? "./" + program.spec : "./spec.json").generate();
+} else {
+    console.log("Sorry! right now we only support typescript!");
+}
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 String.prototype.toCamelCase = function () {
@@ -120,7 +135,7 @@ String.prototype.toPascalCase = function () {
 };
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -179,17 +194,453 @@ var TypeScriptGenerator = function (_super) {
 exports.TypeScriptGenerator = TypeScriptGenerator;
 
 /***/ }),
-/* 5 */
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var fs = __webpack_require__(0);
+var path = __webpack_require__(1);
+var GeneratorHelpers_1 = __webpack_require__(7);
+var BaseGenerator = function () {
+    function BaseGenerator(file) {
+        var data = fs.readFileSync(path.resolve(file)).toString();
+        this.apiData = JSON.parse(data);
+        this.emptyApiControllers = GeneratorHelpers_1.GeneratorHelpers.getEmptyApiControllers(this.apiData.paths);
+        this.apiMethods = GeneratorHelpers_1.GeneratorHelpers.getApiMethods(this.apiData.paths);
+        this.apiControllers = GeneratorHelpers_1.GeneratorHelpers.getApiControllers(this.emptyApiControllers, this.apiMethods);
+    }
+    return BaseGenerator;
+}();
+exports.BaseGenerator = BaseGenerator;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(2);
+var ApiMethod_1 = __webpack_require__(8);
+var GeneratorHelpers = function () {
+    function GeneratorHelpers() {}
+    GeneratorHelpers.getApiControllers = function (emptyApiControllers, apiMethods) {
+        for (var _i = 0, emptyApiControllers_1 = emptyApiControllers; _i < emptyApiControllers_1.length; _i++) {
+            var emptyApiController = emptyApiControllers_1[_i];
+            for (var _a = 0, apiMethods_1 = apiMethods; _a < apiMethods_1.length; _a++) {
+                var apiMethod = apiMethods_1[_a];
+                for (var _b = 0, _c = apiMethod.classNames; _b < _c.length; _b++) {
+                    var className = _c[_b];
+                    if (emptyApiController.name === className) {
+                        emptyApiController.methods.push(apiMethod);
+                        break; // need to add this method only once
+                    }
+                }
+            }
+        }
+        return emptyApiControllers; // this is not empty anymore
+    };
+    GeneratorHelpers.getEmptyApiControllers = function (paths) {
+        var controllers = [];
+        var classNames = [];
+        for (var url in paths) {
+            for (var httpMethod in paths[url]) {
+                paths[url][httpMethod].tags.map(function (className) {
+                    if (classNames.indexOf(className) === -1) {
+                        controllers.push({
+                            name: className,
+                            methods: []
+                        });
+                        classNames.push(className);
+                    }
+                });
+            }
+        }
+        return controllers;
+    };
+    GeneratorHelpers.getApiMethods = function (paths) {
+        var methods = [];
+        for (var url in paths) {
+            for (var httpMethod in paths[url]) {
+                var method = new ApiMethod_1.ApiMethod();
+                method.name = paths[url][httpMethod].operationId;
+                method.classNames = paths[url][httpMethod].tags;
+                var responses = paths[url][httpMethod].responses;
+                var successCodes = ["200", "201", "202", "203", "204", "205", "206", "207", "208", "226"];
+                for (var _i = 0, successCodes_1 = successCodes; _i < successCodes_1.length; _i++) {
+                    var successCode = successCodes_1[_i];
+                    if (responses[successCode]) {
+                        if (successCode === "204") {
+                            method.returnType = "void";
+                        } else {
+                            var returnTypeRef = responses[successCode]["schema"]["$ref"];
+                            method.returnType = returnTypeRef.substr(returnTypeRef.lastIndexOf("/") + 1);
+                        }
+                        break;
+                    }
+                }
+                if (!method.returnType) {
+                    throw new Error("This api method " + method.name + " does not define response for success status");
+                }
+                method.httpMethod = this.cleanHttpMethod(httpMethod);
+                method.allParams = paths[url][httpMethod].parameters;
+                for (var _a = 0, _b = paths[url][httpMethod].parameters; _a < _b.length; _a++) {
+                    var parameter = _b[_a];
+                    if (parameter.schema && parameter.schema["$ref"]) {
+                        var ref = parameter.schema["$ref"];
+                        parameter.schema = ref.substr(ref.lastIndexOf("/") + 1);
+                    }
+                    switch (parameter.in.toUpperCase()) {
+                        case "PATH":
+                            method.pathParams.push(parameter);
+                            break;
+                        case "BODY":
+                            method.bodyParams.push(parameter);
+                            break;
+                        case "QUERY":
+                            method.queryParams.push(parameter);
+                            break;
+                        case "HEADER":
+                            method.headerParams.push(parameter);
+                            break;
+                        default:
+                            throw "Unknown param type -> " + parameter.in.toUpperCase();
+                    }
+                }
+                method.url = url;
+                methods.push(method);
+            }
+        }
+        return methods;
+    };
+    GeneratorHelpers.cleanHttpMethod = function (httpMethod) {
+        switch (httpMethod.toUpperCase()) {
+            case "GET":
+                return interfaces_1.HttpMethod.GET;
+            case "POST":
+                return interfaces_1.HttpMethod.POST;
+            case "PUT":
+                return interfaces_1.HttpMethod.PUT;
+            case "PATCH":
+                return interfaces_1.HttpMethod.PATCH;
+            case "DELETE":
+                return interfaces_1.HttpMethod.DELETE;
+            default:
+                throw "Unknown httpMethod -> " + httpMethod.toUpperCase();
+        }
+    };
+    return GeneratorHelpers;
+}();
+exports.GeneratorHelpers = GeneratorHelpers;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var ApiMethod = function () {
+    function ApiMethod() {
+        this.name = null;
+        this.classNames = [];
+        this.returnType = null;
+        this.httpMethod = null;
+        this.allParams = [];
+        this.pathParams = [];
+        this.queryParams = [];
+        this.bodyParams = [];
+        this.headerParams = [];
+        this.url = null;
+    }
+    return ApiMethod;
+}();
+exports.ApiMethod = ApiMethod;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var InterfaceGenerator = function () {
+    // todo: cleanup code, add description docs
+    function InterfaceGenerator(data, prefixInterfaces) {
+        if (prefixInterfaces === void 0) {
+            prefixInterfaces = 'I';
+        }
+        this.prefixInterfaces = prefixInterfaces;
+        this.definitions = data.definitions;
+    }
+    InterfaceGenerator.prototype.generate = function () {
+        var _this = this;
+        return Object.keys(this.definitions).map(function (interfaceName) {
+            return _this.generateInterfaceDefinition(interfaceName, _this.definitions[interfaceName], _this.prefixInterfaces) + "\n";
+        }).join("\n\n");
+    };
+    InterfaceGenerator.prototype.generateInterfaceDefinition = function (interfaceName, definition, prefixInterface) {
+        if (prefixInterface === void 0) {
+            prefixInterface = 'I';
+        }
+        interfaceName = prefixInterface + InterfaceGenerator.toPascalCase(interfaceName);
+        var interfaceDefinition = InterfaceGenerator.getInterfaceStub();
+        var docBlock = definition.description ? InterfaceGenerator.getDocBlock(definition.description) : '';
+        return interfaceDefinition.replace("{NAME}", interfaceName).replace("{DESCRIPTION}", docBlock).replace("{BODY}", this.getTypeDefinition(definition));
+    };
+    InterfaceGenerator.prototype.getTypeDefinition = function (definition) {
+        var _this = this;
+        var typeBody = [];
+        // type is always object
+        Object.keys(definition.properties).forEach(function (key) {
+            var required = definition.required && definition.required.indexOf(key) !== -1 ? '' : '?';
+            var doc = definition.properties[key].description ? InterfaceGenerator.getDocBlock(definition.properties[key].description) : undefined;
+            typeBody = doc ? typeBody.concat(doc) : typeBody;
+            if (definition.properties[key].type === 'array') {
+                typeBody = typeBody.concat(key + required + ": " + _this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key].items["$ref"]) + "[]" + ",");
+            } else if (definition.properties[key]["$ref"]) {
+                typeBody = typeBody.concat(key + required + ": " + _this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key]["$ref"]) + ",");
+            } else {
+                typeBody = typeBody.concat(key + required + ": " + InterfaceGenerator.transformTypes(definition.properties[key].type !== "object" ? definition.properties[key].type : "any") + ",");
+            }
+        });
+        return typeBody.join("\n\n");
+    };
+    InterfaceGenerator.getInterfaceFromReference = function (ref) {
+        var parts = ref.split("/");
+        return InterfaceGenerator.toPascalCase(parts[parts.length - 1]);
+    };
+    InterfaceGenerator.transformTypes = function (type) {
+        switch (type) {
+            case 'object':
+                return 'any';
+            case 'integer':
+                return 'number';
+            default:
+                return type;
+        }
+    };
+    InterfaceGenerator.toPascalCase = function (s) {
+        return s.charAt(0).toUpperCase() + s.slice(1).replace(/(\_\w)/g, function (m) {
+            return m[1].toUpperCase();
+        });
+    };
+    // dirty methods start
+    InterfaceGenerator.getInterfaceStub = function () {
+        return "{DESCRIPTION} \nexport interface {NAME} {\n{BODY}\n}";
+    };
+    InterfaceGenerator.getDocBlock = function (description) {
+        return "/**\n" + description + "\n*/";
+    };
+    return InterfaceGenerator;
+}();
+exports.InterfaceGenerator = InterfaceGenerator;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(2);
+var Code_1 = __webpack_require__(11);
+var TsControllerGenerator = function () {
+    function TsControllerGenerator(apiControllers) {
+        this.prefix = "I";
+        this.apiControllers = apiControllers;
+    }
+    TsControllerGenerator.prototype.generate = function () {};
+    TsControllerGenerator.prototype.generateString = function () {
+        var codeString = "";
+        var codes = this.generateApiControllerNodes();
+        for (var _i = 0, codes_1 = codes; _i < codes_1.length; _i++) {
+            var code = codes_1[_i];
+            codeString += code.toString() + "\n";
+        }
+        return codeString + this.generateControllerService();
+    };
+    TsControllerGenerator.prototype.generateControllerService = function () {
+        var shopServiceStub = TsControllerGenerator.getServiceStub();
+        var serviceMethodStub = TsControllerGenerator.getServiceMethodStub();
+        return shopServiceStub.replace("{DEFINITION}", this.apiControllers.map(function (api) {
+            // replace doesn't replace all occurrence, so use regular expression (since this is not on production, we don't need to worry about performance)
+            return serviceMethodStub.replace("{CONTROLLER}", api.name).replace(new RegExp("{CONTROLLER_NODE}", "g"), api.name.toPascalCase() + "Node"); //api.name;
+        }).join("\n"));
+    };
+    TsControllerGenerator.prototype.generateApiControllerNodes = function () {
+        var controllerCodes = [];
+        for (var _i = 0, _a = this.apiControllers; _i < _a.length; _i++) {
+            var apiController = _a[_i];
+            var controllerCode = new Code_1.Code("export class " + apiController.name.toPascalCase() + "Node extends Service");
+            for (var _b = 0, _c = apiController.methods; _b < _c.length; _b++) {
+                var apiMethod = _c[_b];
+                controllerCode.addChild(this.generateApiMethodCode(apiMethod));
+            }
+            controllerCodes.push(controllerCode);
+        }
+        return controllerCodes;
+    };
+    TsControllerGenerator.prototype.generateApiMethodCode = function (apiMethod) {
+        var paramsAndOptions = "";
+        if (apiMethod.allParams.length) {
+            var paramsDef = TsControllerGenerator.getParamsDefinition(apiMethod.allParams);
+            paramsAndOptions = "params: " + paramsDef + ", options?: IFetchRequest";
+        } else {
+            paramsAndOptions = "options?: IFetchRequest";
+        }
+        var returnType = "Promise<" + (this.prefix + apiMethod.returnType.toPascalCase()) + ">";
+        var parent = new Code_1.Code("public " + apiMethod.name.toCamelCase() + "(" + paramsAndOptions + "): " + returnType);
+        var fetchRequestString = "return this.client.process({..." + this.getFetchRequestString(apiMethod) + ", ...options} as IFetchRequest);";
+        var child = new Code_1.Code(fetchRequestString);
+        parent.addChild(child);
+        return parent;
+    };
+    TsControllerGenerator.getParamsDefinition = function (params, interfacePrefix) {
+        if (interfacePrefix === void 0) {
+            interfacePrefix = "I";
+        }
+        var paramsDef = "{";
+        for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
+            var param = params_1[_i];
+            if (param.type === "integer") param.type = "number";
+            paramsDef += " " + param.name.toCamelCase() + ": " + (param.type || interfacePrefix + param.schema.toPascalCase()) + ";";
+        }
+        paramsDef += " }";
+        return paramsDef;
+    };
+    TsControllerGenerator.prototype.getFetchRequestString = function (apiMethod) {
+        var fetchRequest = {};
+        if (apiMethod.url && apiMethod.url.length) {
+            fetchRequest.url = "`" + apiMethod.url + "`";
+        }
+        if (apiMethod.url && apiMethod.url.length && apiMethod.pathParams.length) {
+            for (var _i = 0, _a = apiMethod.pathParams; _i < _a.length; _i++) {
+                var pathParam = _a[_i];
+                fetchRequest.url = fetchRequest.url.replace("{" + pathParam.name + "}", "${params." + pathParam.name.toCamelCase() + "}");
+            }
+        }
+        if (apiMethod.queryParams.length) {
+            fetchRequest.queryParameters = {};
+            for (var _b = 0, _c = apiMethod.queryParams; _b < _c.length; _b++) {
+                var queryParam = _c[_b];
+                fetchRequest.queryParameters[queryParam.name] = "params." + queryParam.name.toCamelCase();
+            }
+        }
+        if (apiMethod.bodyParams.length) {
+            var bodyStr = "{";
+            for (var _d = 0, _e = apiMethod.bodyParams; _d < _e.length; _d++) {
+                var bodyParam = _e[_d];
+                bodyStr += " ...params." + bodyParam.name.toCamelCase() + ",";
+            }
+            bodyStr = bodyStr.substr(0, bodyStr.length - 1);
+            bodyStr += "}";
+            fetchRequest.body = "JSON.stringify(" + bodyStr + ")";
+        }
+        if (apiMethod.headerParams.length) {
+            fetchRequest.headers = {};
+            for (var _f = 0, _g = apiMethod.headerParams; _f < _g.length; _f++) {
+                var headerParam = _g[_f];
+                fetchRequest.headers[headerParam.name] = "params." + headerParam.name.toCamelCase();
+            }
+        }
+        if (apiMethod.httpMethod) {
+            fetchRequest.method = "\"" + interfaces_1.HttpMethod[apiMethod.httpMethod] + "\"";
+        }
+        return this.convertFetchRequestToString(fetchRequest);
+    };
+    TsControllerGenerator.prototype.convertFetchRequestToString = function (fetchRequest, addQuoteAroundKey) {
+        if (addQuoteAroundKey === void 0) {
+            addQuoteAroundKey = false;
+        }
+        var result = "{";
+        for (var key in fetchRequest) {
+            var value = fetchRequest[key];
+            if (typeof value === "object") {
+                var subValue = this.convertFetchRequestToString(value, key === "headers");
+                result += addQuoteAroundKey ? " \"" + key + "\": " + subValue + "," : " " + key + ": " + subValue + ",";
+            } else {
+                result += addQuoteAroundKey ? " \"" + key + "\": " + value + "," : " " + key + ": " + value + ",";
+            }
+        }
+        result = result.substr(0, result.length - 1);
+        result += " }";
+        return result;
+    };
+    // dirty methods start
+    TsControllerGenerator.getServiceMethodStub = function () {
+        return 'get {CONTROLLER}(): {CONTROLLER_NODE} {\n  return new {CONTROLLER_NODE}(this.client);\n}\n';
+    };
+    TsControllerGenerator.getServiceStub = function () {
+        return 'export class ShopService extends Service {\n{DEFINITION}\n}\n';
+    };
+    return TsControllerGenerator;
+}();
+exports.TsControllerGenerator = TsControllerGenerator;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Code = function () {
+    function Code(firstLine) {
+        this.code = firstLine;
+        this.children = [];
+    }
+    Code.prototype.addLine = function (line) {
+        this.code += "\n" + line;
+    };
+    Code.prototype.addChild = function (code) {
+        this.children.push(code);
+    };
+    Code.prototype.toString = function () {
+        if (this.children.length > 0) {
+            var childrenString = this.children.map(function (child) {
+                return child.toString();
+            }).reduce(function (prev, curr) {
+                return prev + "\n" + curr;
+            });
+            childrenString = this.addIndentation(childrenString, 2);
+            return this.code + " {\n" + childrenString + "\n}";
+        }
+        return this.code;
+    };
+    Code.prototype.addIndentation = function (str, numSpaces) {
+        var spaces = "";
+        for (var i = 0; i < numSpaces; i++) {
+            spaces += " ";
+        }
+        str = spaces + str;
+        str = str.replace(/\n/g, "\n" + spaces);
+        return str;
+    };
+    return Code;
+}();
+exports.Code = Code;
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var EventEmitter = __webpack_require__(15).EventEmitter;
+var EventEmitter = __webpack_require__(13).EventEmitter;
 var spawn = __webpack_require__(14).spawn;
-var readlink = __webpack_require__(13).readlinkSync;
-var path = __webpack_require__(2);
+var readlink = __webpack_require__(15).readlinkSync;
+var path = __webpack_require__(1);
 var dirname = path.dirname;
 var basename = path.basename;
 var fs = __webpack_require__(0);
@@ -1295,449 +1746,19 @@ function exists(file) {
 
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var fs = __webpack_require__(0);
-var path = __webpack_require__(2);
-var GeneratorHelpers_1 = __webpack_require__(8);
-var BaseGenerator = function () {
-    function BaseGenerator(file) {
-        var data = fs.readFileSync(path.resolve(file)).toString();
-        this.apiData = JSON.parse(data);
-        this.emptyApiControllers = GeneratorHelpers_1.GeneratorHelpers.getEmptyApiControllers(this.apiData.paths);
-        this.apiMethods = GeneratorHelpers_1.GeneratorHelpers.getApiMethods(this.apiData.paths);
-        this.apiControllers = GeneratorHelpers_1.GeneratorHelpers.getApiControllers(this.emptyApiControllers, this.apiMethods);
-    }
-    return BaseGenerator;
-}();
-exports.BaseGenerator = BaseGenerator;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Code = function () {
-    function Code(firstLine) {
-        this.code = firstLine;
-        this.children = [];
-    }
-    Code.prototype.addLine = function (line) {
-        this.code += "\n" + line;
-    };
-    Code.prototype.addChild = function (code) {
-        this.children.push(code);
-    };
-    Code.prototype.toString = function () {
-        if (this.children.length > 0) {
-            var childrenString = this.children.map(function (child) {
-                return child.toString();
-            }).reduce(function (prev, curr) {
-                return prev + "\n" + curr;
-            });
-            childrenString = this.addIndentation(childrenString, 2);
-            return this.code + " {\n" + childrenString + "\n}";
-        }
-        return this.code;
-    };
-    Code.prototype.addIndentation = function (str, numSpaces) {
-        var spaces = "";
-        for (var i = 0; i < numSpaces; i++) {
-            spaces += " ";
-        }
-        str = spaces + str;
-        str = str.replace(/\n/g, "\n" + spaces);
-        return str;
-    };
-    return Code;
-}();
-exports.Code = Code;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var interfaces_1 = __webpack_require__(1);
-var ApiMethod_1 = __webpack_require__(12);
-var GeneratorHelpers = function () {
-    function GeneratorHelpers() {}
-    GeneratorHelpers.getApiControllers = function (emptyApiControllers, apiMethods) {
-        for (var _i = 0, emptyApiControllers_1 = emptyApiControllers; _i < emptyApiControllers_1.length; _i++) {
-            var emptyApiController = emptyApiControllers_1[_i];
-            for (var _a = 0, apiMethods_1 = apiMethods; _a < apiMethods_1.length; _a++) {
-                var apiMethod = apiMethods_1[_a];
-                for (var _b = 0, _c = apiMethod.classNames; _b < _c.length; _b++) {
-                    var className = _c[_b];
-                    if (emptyApiController.name === className) {
-                        emptyApiController.methods.push(apiMethod);
-                        break; // need to add this method only once
-                    }
-                }
-            }
-        }
-        return emptyApiControllers; // this is not empty anymore
-    };
-    GeneratorHelpers.getEmptyApiControllers = function (paths) {
-        var controllers = [];
-        var classNames = [];
-        for (var url in paths) {
-            for (var httpMethod in paths[url]) {
-                paths[url][httpMethod].tags.map(function (className) {
-                    if (classNames.indexOf(className) === -1) {
-                        controllers.push({
-                            name: className,
-                            methods: []
-                        });
-                        classNames.push(className);
-                    }
-                });
-            }
-        }
-        return controllers;
-    };
-    GeneratorHelpers.getApiMethods = function (paths) {
-        var methods = [];
-        for (var url in paths) {
-            for (var httpMethod in paths[url]) {
-                var method = new ApiMethod_1.ApiMethod();
-                method.name = paths[url][httpMethod].operationId;
-                method.classNames = paths[url][httpMethod].tags;
-                var responses = paths[url][httpMethod].responses;
-                if (responses["200"]) {
-                    var returnTypeRef = responses["200"]["schema"]["$ref"];
-                    method.returnType = returnTypeRef.substr(returnTypeRef.lastIndexOf("/") + 1);
-                }
-                method.httpMethod = this.cleanHttpMethod(httpMethod);
-                method.allParams = paths[url][httpMethod].parameters;
-                for (var _i = 0, _a = paths[url][httpMethod].parameters; _i < _a.length; _i++) {
-                    var parameter = _a[_i];
-                    if (parameter.schema && parameter.schema["$ref"]) {
-                        var ref = parameter.schema["$ref"];
-                        parameter.schema = ref.substr(ref.lastIndexOf("/") + 1);
-                    }
-                    switch (parameter.in.toUpperCase()) {
-                        case "PATH":
-                            method.pathParams.push(parameter);
-                            break;
-                        case "BODY":
-                            method.bodyParams.push(parameter);
-                            break;
-                        case "QUERY":
-                            method.queryParams.push(parameter);
-                            break;
-                        case "HEADER":
-                            method.headerParams.push(parameter);
-                            break;
-                        default:
-                            throw "Unknown param type -> " + parameter.in.toUpperCase();
-                    }
-                }
-                method.url = url;
-                methods.push(method);
-            }
-        }
-        return methods;
-    };
-    GeneratorHelpers.cleanHttpMethod = function (httpMethod) {
-        switch (httpMethod.toUpperCase()) {
-            case "GET":
-                return interfaces_1.HttpMethod.GET;
-            case "POST":
-                return interfaces_1.HttpMethod.POST;
-            case "PUT":
-                return interfaces_1.HttpMethod.PUT;
-            case "PATCH":
-                return interfaces_1.HttpMethod.PATCH;
-            case "DELETE":
-                return interfaces_1.HttpMethod.DELETE;
-            default:
-                throw "Unknown httpMethod -> " + httpMethod.toUpperCase();
-        }
-    };
-    return GeneratorHelpers;
-}();
-exports.GeneratorHelpers = GeneratorHelpers;
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var InterfaceGenerator = function () {
-    // todo: cleanup code, add description docs
-    function InterfaceGenerator(data, prefixInterfaces) {
-        if (prefixInterfaces === void 0) {
-            prefixInterfaces = 'I';
-        }
-        this.prefixInterfaces = prefixInterfaces;
-        this.definitions = data.definitions;
-    }
-    InterfaceGenerator.prototype.generate = function () {
-        var _this = this;
-        return Object.keys(this.definitions).map(function (interfaceName) {
-            return _this.generateInterfaceDefinition(interfaceName, _this.definitions[interfaceName], _this.prefixInterfaces) + "\n";
-        }).join("\n\n");
-    };
-    InterfaceGenerator.prototype.generateInterfaceDefinition = function (interfaceName, definition, prefixInterface) {
-        if (prefixInterface === void 0) {
-            prefixInterface = 'I';
-        }
-        interfaceName = prefixInterface + InterfaceGenerator.toPascalCase(interfaceName);
-        var interfaceDefinition = InterfaceGenerator.getInterfaceStub();
-        var docBlock = definition.description ? InterfaceGenerator.getDocBlock(definition.description) : '';
-        return interfaceDefinition.replace("{NAME}", interfaceName).replace("{DESCRIPTION}", docBlock).replace("{BODY}", this.getTypeDefinition(definition));
-    };
-    InterfaceGenerator.prototype.getTypeDefinition = function (definition) {
-        var _this = this;
-        var typeBody = [];
-        // type is always object
-        Object.keys(definition.properties).forEach(function (key) {
-            var required = definition.required && definition.required.indexOf(key) !== -1 ? '' : '?';
-            var doc = definition.properties[key].description ? InterfaceGenerator.getDocBlock(definition.properties[key].description) : undefined;
-            typeBody = doc ? typeBody.concat(doc) : typeBody;
-            if (definition.properties[key].type === 'array') {
-                typeBody = typeBody.concat(key + required + ": " + _this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key].items["$ref"]) + "[]" + ",");
-            } else if (definition.properties[key]["$ref"]) {
-                typeBody = typeBody.concat(key + required + ": " + _this.prefixInterfaces + InterfaceGenerator.getInterfaceFromReference(definition.properties[key]["$ref"]) + ",");
-            } else {
-                typeBody = typeBody.concat(key + required + ": " + InterfaceGenerator.transformTypes(definition.properties[key].type !== "object" ? definition.properties[key].type : "any") + ",");
-            }
-        });
-        return typeBody.join("\n\n");
-    };
-    InterfaceGenerator.getInterfaceFromReference = function (ref) {
-        var parts = ref.split("/");
-        return InterfaceGenerator.toPascalCase(parts[parts.length - 1]);
-    };
-    InterfaceGenerator.transformTypes = function (type) {
-        switch (type) {
-            case 'object':
-                return 'any';
-            case 'integer':
-                return 'number';
-            default:
-                return type;
-        }
-    };
-    InterfaceGenerator.toPascalCase = function (s) {
-        return s.charAt(0).toUpperCase() + s.slice(1).replace(/(\_\w)/g, function (m) {
-            return m[1].toUpperCase();
-        });
-    };
-    // dirty methods start
-    InterfaceGenerator.getInterfaceStub = function () {
-        return "{DESCRIPTION} \nexport interface {NAME} {\n{BODY}\n}";
-    };
-    InterfaceGenerator.getDocBlock = function (description) {
-        return "/**\n" + description + "\n*/";
-    };
-    return InterfaceGenerator;
-}();
-exports.InterfaceGenerator = InterfaceGenerator;
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var interfaces_1 = __webpack_require__(1);
-var Code_1 = __webpack_require__(7);
-var TsControllerGenerator = function () {
-    function TsControllerGenerator(apiControllers) {
-        this.prefix = "I";
-        this.apiControllers = apiControllers;
-    }
-    TsControllerGenerator.prototype.generate = function () {};
-    TsControllerGenerator.prototype.generateString = function () {
-        var codeString = "";
-        var codes = this.generateApiControllerNodes();
-        for (var _i = 0, codes_1 = codes; _i < codes_1.length; _i++) {
-            var code = codes_1[_i];
-            codeString += code.toString() + "\n";
-        }
-        return codeString + this.generateControllerService();
-    };
-    TsControllerGenerator.prototype.generateControllerService = function () {
-        var shopServiceStub = TsControllerGenerator.getServiceStub();
-        var serviceMethodStub = TsControllerGenerator.getServiceMethodStub();
-        return shopServiceStub.replace("{DEFINITION}", this.apiControllers.map(function (api) {
-            // replace doesn't replace all occurrence, so use regular expression (since this is not on production, we don't need to worry about performance)
-            return serviceMethodStub.replace("{CONTROLLER}", api.name).replace(new RegExp("{CONTROLLER_NODE}", "g"), api.name.toPascalCase() + "Node"); //api.name;
-        }).join("\n"));
-    };
-    TsControllerGenerator.prototype.generateApiControllerNodes = function () {
-        var controllerCodes = [];
-        for (var _i = 0, _a = this.apiControllers; _i < _a.length; _i++) {
-            var apiController = _a[_i];
-            var controllerCode = new Code_1.Code("export class " + apiController.name.toPascalCase() + "Node extends Service");
-            for (var _b = 0, _c = apiController.methods; _b < _c.length; _b++) {
-                var apiMethod = _c[_b];
-                controllerCode.addChild(this.generateApiMethodCode(apiMethod));
-            }
-            controllerCodes.push(controllerCode);
-        }
-        return controllerCodes;
-    };
-    TsControllerGenerator.prototype.generateApiMethodCode = function (apiMethod) {
-        var paramsAndOptions = "";
-        if (apiMethod.allParams.length) {
-            var paramsDef = TsControllerGenerator.getParamsDefinition(apiMethod.allParams);
-            paramsAndOptions = "params: " + paramsDef + ", options?: IFetchRequest";
-        } else {
-            paramsAndOptions = "options?: IFetchRequest";
-        }
-        var returnType = apiMethod.returnType ? "Promise<" + this.prefix + apiMethod.returnType.toPascalCase() + ">" : "void";
-        var parent = new Code_1.Code("public " + apiMethod.name.toCamelCase() + "(" + paramsAndOptions + "): " + returnType);
-        var fetchRequestString = "return this.client.process({..." + this.getFetchRequestString(apiMethod) + ", ...options} as IFetchRequest);";
-        var child = new Code_1.Code(fetchRequestString);
-        parent.addChild(child);
-        return parent;
-    };
-    TsControllerGenerator.getParamsDefinition = function (params, interfacePrefix) {
-        if (interfacePrefix === void 0) {
-            interfacePrefix = "I";
-        }
-        var paramsDef = "{";
-        for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
-            var param = params_1[_i];
-            if (param.type === "integer") param.type = "number";
-            paramsDef += " " + param.name.toCamelCase() + ": " + (param.type || interfacePrefix + param.schema.toPascalCase()) + ";";
-        }
-        paramsDef += " }";
-        return paramsDef;
-    };
-    TsControllerGenerator.prototype.getFetchRequestString = function (apiMethod) {
-        var fetchRequest = {};
-        if (apiMethod.url && apiMethod.url.length) {
-            fetchRequest.url = "`" + apiMethod.url + "`";
-        }
-        if (apiMethod.url && apiMethod.url.length && apiMethod.pathParams.length) {
-            for (var _i = 0, _a = apiMethod.pathParams; _i < _a.length; _i++) {
-                var pathParam = _a[_i];
-                fetchRequest.url = fetchRequest.url.replace("{" + pathParam.name + "}", "${params." + pathParam.name.toCamelCase() + "}");
-            }
-        }
-        if (apiMethod.queryParams.length) {
-            fetchRequest.queryParameters = {};
-            for (var _b = 0, _c = apiMethod.queryParams; _b < _c.length; _b++) {
-                var queryParam = _c[_b];
-                fetchRequest.queryParameters[queryParam.name] = "params." + queryParam.name.toCamelCase();
-            }
-        }
-        if (apiMethod.bodyParams.length) {
-            var bodyStr = "{";
-            for (var _d = 0, _e = apiMethod.bodyParams; _d < _e.length; _d++) {
-                var bodyParam = _e[_d];
-                bodyStr += " ...params." + bodyParam.name.toCamelCase() + ",";
-            }
-            bodyStr = bodyStr.substr(0, bodyStr.length - 1);
-            bodyStr += "}";
-            fetchRequest.body = "JSON.stringify(" + bodyStr + ")";
-        }
-        if (apiMethod.headerParams.length) {
-            fetchRequest.headers = {};
-            for (var _f = 0, _g = apiMethod.headerParams; _f < _g.length; _f++) {
-                var headerParam = _g[_f];
-                fetchRequest.headers[headerParam.name] = "params." + headerParam.name.toCamelCase();
-            }
-        }
-        if (apiMethod.httpMethod) {
-            fetchRequest.method = "\"" + interfaces_1.HttpMethod[apiMethod.httpMethod] + "\"";
-        }
-        return this.convertFetchRequestToString(fetchRequest);
-    };
-    TsControllerGenerator.prototype.convertFetchRequestToString = function (fetchRequest, addQuoteAroundKey) {
-        if (addQuoteAroundKey === void 0) {
-            addQuoteAroundKey = false;
-        }
-        var result = "{";
-        for (var key in fetchRequest) {
-            var value = fetchRequest[key];
-            if (typeof value === "object") {
-                var subValue = this.convertFetchRequestToString(value, key === "headers");
-                result += addQuoteAroundKey ? " \"" + key + "\": " + subValue + "," : " " + key + ": " + subValue + ",";
-            } else {
-                result += addQuoteAroundKey ? " \"" + key + "\": " + value + "," : " " + key + ": " + value + ",";
-            }
-        }
-        result = result.substr(0, result.length - 1);
-        result += " }";
-        return result;
-    };
-    // dirty methods start
-    TsControllerGenerator.getServiceMethodStub = function () {
-        return 'get {CONTROLLER}(): {CONTROLLER_NODE} {\n  return new {CONTROLLER_NODE}(this.client);\n}\n';
-    };
-    TsControllerGenerator.getServiceStub = function () {
-        return 'export class ShopService extends Service {\n{DEFINITION}\n}\n';
-    };
-    return TsControllerGenerator;
-}();
-exports.TsControllerGenerator = TsControllerGenerator;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", { value: true });
-__webpack_require__(3);
-var TypeScriptGenerator_1 = __webpack_require__(4);
-var program = __webpack_require__(5);
-program.version('0.0.1').option("-l, --lang [type]", "Language").option("-s, --spec [path]", "Spec file path").parse(process.argv);
-if (program.lang === "typescript") {
-    new TypeScriptGenerator_1.TypeScriptGenerator(program.spec ? "./" + program.spec : "./spec.json").generate();
-} else {
-    console.log("Sorry! right now we only support typescript!");
-}
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var ApiMethod = function () {
-    function ApiMethod() {
-        this.name = null;
-        this.classNames = [];
-        this.returnType = null;
-        this.httpMethod = null;
-        this.allParams = [];
-        this.pathParams = [];
-        this.queryParams = [];
-        this.bodyParams = [];
-        this.headerParams = [];
-        this.url = null;
-    }
-    return ApiMethod;
-}();
-exports.ApiMethod = ApiMethod;
-
-/***/ }),
 /* 13 */
+/***/ (function(module, exports) {
+
+module.exports = require("events");
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+module.exports = require("child_process");
+
+/***/ }),
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var fs = __webpack_require__(0)
@@ -1753,18 +1774,6 @@ exports.readlinkSync = function (p) {
 
 
 
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports) {
-
-module.exports = require("child_process");
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports) {
-
-module.exports = require("events");
 
 /***/ })
 /******/ ]);

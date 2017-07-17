@@ -7,3 +7,6 @@ node_modules
 
 build
 .awcache
+
+coverage
+.nyc_output
