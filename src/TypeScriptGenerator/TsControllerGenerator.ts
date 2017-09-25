@@ -55,7 +55,7 @@ export class TsControllerGenerator implements IGenerator {
       paramsAndOptions = `options?: IFetchRequest`;
     }
 
-    const returnType = `Promise<${this.prefix + apiMethod.returnType.toPascalCase()}>`;
+    const returnType = `Promise<${apiMethod.returnType === "void" ? "void" : this.prefix + apiMethod.returnType.toPascalCase()}>`;
     let parent: ICode = new Code(`public ${apiMethod.name.toCamelCase()}(${paramsAndOptions}): ${returnType}`);
     let fetchRequestString: string = `return this.client.process({...${this.getFetchRequestString(apiMethod)}, ...options} as IFetchRequest);`;
     let child: ICode = new Code(fetchRequestString);
