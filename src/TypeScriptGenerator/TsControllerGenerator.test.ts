@@ -210,6 +210,68 @@ describe("TsControllerGenerator", () => {
         "}"
       );
     });
+    it("returns Promise<void> for void methods", () => {
+      const apiMethod: IApiMethod = new ApiMethod();
+      apiMethod.name = "zones-create";
+      apiMethod.classNames = ["zones"];
+      apiMethod.returnType = "void";
+      apiMethod.httpMethod = HttpMethod.POST;
+      apiMethod.allParams = [
+        {
+          "name": "id",
+          "in": "path",
+          "type": "integer",
+          "description": "Id of zones",
+          "required": true
+        },
+        {
+          "name": "data",
+          "in": "body",
+          "required": true,
+          "description": "",
+          "schema": "zones"
+        },
+        {
+          "name": "Content-Type",
+          "in": "header",
+          "type": "string",
+          "description": "Content Type",
+          "required": true
+        }
+      ];
+      apiMethod.pathParams = [{
+        "name": "id",
+        "in": "path",
+        "type": "integer",
+        "description": "Id of zones",
+        "required": true
+      }];
+      apiMethod.bodyParams = [{
+        "name": "data",
+        "in": "body",
+        "required": true,
+        "description": "",
+        "schema": "zones"
+      }];
+      apiMethod.headerParams = [{
+        "name": "Content-Type",
+        "in": "header",
+        "type": "string",
+        "description": "Content Type",
+        "required": true
+      }];
+      apiMethod.url = "/zones/{id}";
+
+      const gen = new TsControllerGenerator([]);
+      const code: ICode = gen.generateApiMethodCode(apiMethod);
+
+      expect(code.toString()).to.equal(
+        "public zonesCreate(params: { id: number; data: IZones; contentType: string; }, options?: IFetchRequest): Promise<void> {\n" +
+        "  return this.client.process({...{ url: `/zones/${params.id}`, body: JSON.stringify({ ...params.data}), headers: { \"Content-Type\": params.contentType }, method: \"POST\" }, ...options} as IFetchRequest);\n" +
+        "}"
+      );
+    });
+
 
     it("does not write params if params are empty", () => {
       const gen = new TsControllerGenerator([]);
