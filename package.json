@@ -48,7 +48,7 @@
     "mocha": "^3.4.1",
     "nyc": "^11.0.3",
     "semantic-release": "^8.0.3",
-    "ts-node": "^3.0.4",
+    "ts-node": "^4.0.0",
     "typescript": "^2.3.2",
     "webpack": "^3.0.0"
   },
