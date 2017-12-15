@@ -67,6 +67,13 @@ export class GeneratorHelpers {
         method.httpMethod = this.cleanHttpMethod(httpMethod);
         method.allParams = paths[url][httpMethod].parameters;
 
+        if (paths[url][httpMethod].security && paths[url][httpMethod].security.length && paths[url][httpMethod].security[0].basic) {
+          method.allParams = [
+            {name: "username", type: "string", in: "header"},
+            {name: "password", type: "string", in: "header"}
+          ];
+        }
+
         for (let parameter of paths[url][httpMethod].parameters) {
           if (parameter.schema && parameter.schema["$ref"]) {
             const ref = parameter.schema["$ref"];
