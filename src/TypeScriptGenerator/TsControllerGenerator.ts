@@ -66,8 +66,12 @@ export class TsControllerGenerator implements IGenerator {
   public static getParamsDefinition(params: IParams[], interfacePrefix: string = "I"): string {
     let paramsDef: string = "{";
     for (let param of params) {
-      if (param.type === "integer") param.type = "number";
-      paramsDef += ` ${param.name.toCamelCase()}: ${param.type || interfacePrefix + param.schema.toPascalCase()};`;
+      if (param.name === "Basic Authentication") {
+        paramsDef += ` username: string; password: string;`;
+      } else {
+        if (param.type === "integer") param.type = "number";
+        paramsDef += ` ${param.name.toCamelCase()}: ${param.type || interfacePrefix + param.schema.toPascalCase()};`;
+      }
     }
     paramsDef += " }";
     return paramsDef;
@@ -101,7 +105,11 @@ export class TsControllerGenerator implements IGenerator {
     if (apiMethod.headerParams.length) {
       fetchRequest.headers = {};
       for (let headerParam of apiMethod.headerParams) {
-        fetchRequest.headers[headerParam.name] = `params.${headerParam.name.toCamelCase()}`;
+        if (headerParam.name === "Basic Authentication") {
+          fetchRequest.headers["Authorization"] = `"Basic" + btoa(params.username + ":" + params.password)`;
+        } else {
+          fetchRequest.headers[headerParam.name] = `params.${headerParam.name.toCamelCase()}`;
+        }
       }
     }
     if (apiMethod.httpMethod) {
