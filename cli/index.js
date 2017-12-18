@@ -61,7 +61,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -101,9 +101,22 @@ var HttpMethod;
 
 
 Object.defineProperty(exports, "__esModule", { value: true });
-__webpack_require__(4);
-var TypeScriptGenerator_1 = __webpack_require__(5);
-var program = __webpack_require__(12);
+var SpecialParams;
+(function (SpecialParams) {
+    SpecialParams["BASIC_AUTH"] = "BASIC_AUTH";
+})(SpecialParams = exports.SpecialParams || (exports.SpecialParams = {}));
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(5);
+var TypeScriptGenerator_1 = __webpack_require__(6);
+var program = __webpack_require__(13);
 program.version('0.0.1').option("-l, --lang [type]", "Language").option("-s, --spec [path]", "Spec file path").parse(process.argv);
 if (program.lang === "typescript") {
     new TypeScriptGenerator_1.TypeScriptGenerator(program.spec ? "./" + program.spec : "./spec.json").generate();
@@ -112,7 +125,7 @@ if (program.lang === "typescript") {
 }
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 String.prototype.toCamelCase = function () {
@@ -135,7 +148,7 @@ String.prototype.toPascalCase = function () {
 };
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -157,9 +170,9 @@ var __extends = this && this.__extends || function () {
 }();
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = __webpack_require__(0);
-var BaseGenerator_1 = __webpack_require__(6);
-var InterfaceGenerator_1 = __webpack_require__(9);
-var TsControllerGenerator_1 = __webpack_require__(10);
+var BaseGenerator_1 = __webpack_require__(7);
+var InterfaceGenerator_1 = __webpack_require__(10);
+var TsControllerGenerator_1 = __webpack_require__(11);
 var TypeScriptGenerator = /** @class */function (_super) {
     __extends(TypeScriptGenerator, _super);
     function TypeScriptGenerator() {
@@ -194,7 +207,7 @@ var TypeScriptGenerator = /** @class */function (_super) {
 exports.TypeScriptGenerator = TypeScriptGenerator;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -203,7 +216,7 @@ exports.TypeScriptGenerator = TypeScriptGenerator;
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = __webpack_require__(0);
 var path = __webpack_require__(1);
-var GeneratorHelpers_1 = __webpack_require__(7);
+var GeneratorHelpers_1 = __webpack_require__(8);
 var BaseGenerator = /** @class */function () {
     function BaseGenerator(file) {
         var data = fs.readFileSync(path.resolve(file)).toString();
@@ -217,7 +230,7 @@ var BaseGenerator = /** @class */function () {
 exports.BaseGenerator = BaseGenerator;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -225,7 +238,8 @@ exports.BaseGenerator = BaseGenerator;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var interfaces_1 = __webpack_require__(2);
-var ApiMethod_1 = __webpack_require__(8);
+var ApiMethod_1 = __webpack_require__(9);
+var SpecialParams_1 = __webpack_require__(3);
 var GeneratorHelpers = /** @class */function () {
     function GeneratorHelpers() {}
     GeneratorHelpers.getApiControllers = function (emptyApiControllers, apiMethods) {
@@ -290,7 +304,7 @@ var GeneratorHelpers = /** @class */function () {
                 method.allParams = paths[url][httpMethod].parameters;
                 if (paths[url][httpMethod].security && paths[url][httpMethod].security.length && paths[url][httpMethod].security[0].basic) {
                     method.allParams = method.allParams.concat([{
-                        name: "Basic Authentication",
+                        name: SpecialParams_1.SpecialParams.BASIC_AUTH,
                         in: "header"
                     }]);
                 }
@@ -344,7 +358,7 @@ var GeneratorHelpers = /** @class */function () {
 exports.GeneratorHelpers = GeneratorHelpers;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -369,7 +383,7 @@ var ApiMethod = /** @class */function () {
 exports.ApiMethod = ApiMethod;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -449,7 +463,7 @@ var InterfaceGenerator = /** @class */function () {
 exports.InterfaceGenerator = InterfaceGenerator;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -457,7 +471,8 @@ exports.InterfaceGenerator = InterfaceGenerator;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var interfaces_1 = __webpack_require__(2);
-var Code_1 = __webpack_require__(11);
+var Code_1 = __webpack_require__(12);
+var SpecialParams_1 = __webpack_require__(3);
 var TsControllerGenerator = /** @class */function () {
     function TsControllerGenerator(apiControllers) {
         this.prefix = "I";
@@ -516,7 +531,7 @@ var TsControllerGenerator = /** @class */function () {
         var paramsDef = "{";
         for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
             var param = params_1[_i];
-            if (param.name === "Basic Authentication") {
+            if (param.name === SpecialParams_1.SpecialParams.BASIC_AUTH) {
                 paramsDef += " username: string; password: string;";
             } else {
                 if (param.type === "integer") param.type = "number";
@@ -558,8 +573,8 @@ var TsControllerGenerator = /** @class */function () {
             fetchRequest.headers = {};
             for (var _f = 0, _g = apiMethod.headerParams; _f < _g.length; _f++) {
                 var headerParam = _g[_f];
-                if (headerParam.name === "Basic Authentication") {
-                    fetchRequest.headers["Authorization"] = "\"Basic\" + btoa(params.username + \":\" + params.password)";
+                if (headerParam.name === SpecialParams_1.SpecialParams.BASIC_AUTH) {
+                    fetchRequest.headers["Authorization"] = "\"Basic \" + btoa(params.username + \":\" + params.password)";
                 } else {
                     fetchRequest.headers[headerParam.name] = "params." + headerParam.name.toCamelCase();
                 }
@@ -600,7 +615,7 @@ var TsControllerGenerator = /** @class */function () {
 exports.TsControllerGenerator = TsControllerGenerator;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -644,15 +659,15 @@ var Code = /** @class */function () {
 exports.Code = Code;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var EventEmitter = __webpack_require__(13).EventEmitter;
-var spawn = __webpack_require__(14).spawn;
+var EventEmitter = __webpack_require__(14).EventEmitter;
+var spawn = __webpack_require__(15).spawn;
 var path = __webpack_require__(1);
 var dirname = path.dirname;
 var basename = path.basename;
@@ -1808,13 +1823,13 @@ function exists(file) {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 module.exports = require("events");
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 module.exports = require("child_process");
