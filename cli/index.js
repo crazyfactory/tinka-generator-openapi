@@ -160,7 +160,7 @@ var fs = __webpack_require__(0);
 var BaseGenerator_1 = __webpack_require__(6);
 var InterfaceGenerator_1 = __webpack_require__(9);
 var TsControllerGenerator_1 = __webpack_require__(10);
-var TypeScriptGenerator = function (_super) {
+var TypeScriptGenerator = /** @class */function (_super) {
     __extends(TypeScriptGenerator, _super);
     function TypeScriptGenerator() {
         return _super !== null && _super.apply(this, arguments) || this;
@@ -174,7 +174,7 @@ var TypeScriptGenerator = function (_super) {
         var controllersString = this.generateApis();
         var sdk_stub = TypeScriptGenerator.getSdkStub();
         var sdk = sdk_stub.replace("{SDK_BODY}", interfaceString + controllersString);
-        fs.writeFileSync("sdk/TypeScript/src/sdk.ts", sdk);
+        fs.writeFileSync("sdk.ts", sdk);
         this.bundle();
         console.log("Sdk generated, you can now `run npm install && npm run build && npm publish`");
     };
@@ -204,7 +204,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs = __webpack_require__(0);
 var path = __webpack_require__(1);
 var GeneratorHelpers_1 = __webpack_require__(7);
-var BaseGenerator = function () {
+var BaseGenerator = /** @class */function () {
     function BaseGenerator(file) {
         var data = fs.readFileSync(path.resolve(file)).toString();
         this.apiData = JSON.parse(data);
@@ -226,7 +226,7 @@ exports.BaseGenerator = BaseGenerator;
 Object.defineProperty(exports, "__esModule", { value: true });
 var interfaces_1 = __webpack_require__(2);
 var ApiMethod_1 = __webpack_require__(8);
-var GeneratorHelpers = function () {
+var GeneratorHelpers = /** @class */function () {
     function GeneratorHelpers() {}
     GeneratorHelpers.getApiControllers = function (emptyApiControllers, apiMethods) {
         for (var _i = 0, emptyApiControllers_1 = emptyApiControllers; _i < emptyApiControllers_1.length; _i++) {
@@ -288,7 +288,13 @@ var GeneratorHelpers = function () {
                 }
                 method.httpMethod = this.cleanHttpMethod(httpMethod);
                 method.allParams = paths[url][httpMethod].parameters;
-                for (var _a = 0, _b = paths[url][httpMethod].parameters; _a < _b.length; _a++) {
+                if (paths[url][httpMethod].security && paths[url][httpMethod].security.length && paths[url][httpMethod].security[0].basic) {
+                    method.allParams = method.allParams.concat([{
+                        name: "Basic Authentication",
+                        in: "header"
+                    }]);
+                }
+                for (var _a = 0, _b = method.allParams; _a < _b.length; _a++) {
                     var parameter = _b[_a];
                     if (parameter.schema && parameter.schema["$ref"]) {
                         var ref = parameter.schema["$ref"];
@@ -345,7 +351,7 @@ exports.GeneratorHelpers = GeneratorHelpers;
 
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var ApiMethod = function () {
+var ApiMethod = /** @class */function () {
     function ApiMethod() {
         this.name = null;
         this.classNames = [];
@@ -370,7 +376,7 @@ exports.ApiMethod = ApiMethod;
 
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var InterfaceGenerator = function () {
+var InterfaceGenerator = /** @class */function () {
     // todo: cleanup code, add description docs
     function InterfaceGenerator(data, prefixInterfaces) {
         if (prefixInterfaces === void 0) {
@@ -452,7 +458,7 @@ exports.InterfaceGenerator = InterfaceGenerator;
 Object.defineProperty(exports, "__esModule", { value: true });
 var interfaces_1 = __webpack_require__(2);
 var Code_1 = __webpack_require__(11);
-var TsControllerGenerator = function () {
+var TsControllerGenerator = /** @class */function () {
     function TsControllerGenerator(apiControllers) {
         this.prefix = "I";
         this.apiControllers = apiControllers;
@@ -496,7 +502,7 @@ var TsControllerGenerator = function () {
         } else {
             paramsAndOptions = "options?: IFetchRequest";
         }
-        var returnType = "Promise<" + (this.prefix + apiMethod.returnType.toPascalCase()) + ">";
+        var returnType = "Promise<" + (apiMethod.returnType === "void" ? "void" : this.prefix + apiMethod.returnType.toPascalCase()) + ">";
         var parent = new Code_1.Code("public " + apiMethod.name.toCamelCase() + "(" + paramsAndOptions + "): " + returnType);
         var fetchRequestString = "return this.client.process({..." + this.getFetchRequestString(apiMethod) + ", ...options} as IFetchRequest);";
         var child = new Code_1.Code(fetchRequestString);
@@ -510,8 +516,12 @@ var TsControllerGenerator = function () {
         var paramsDef = "{";
         for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
             var param = params_1[_i];
-            if (param.type === "integer") param.type = "number";
-            paramsDef += " " + param.name.toCamelCase() + ": " + (param.type || interfacePrefix + param.schema.toPascalCase()) + ";";
+            if (param.name === "Basic Authentication") {
+                paramsDef += " username: string; password: string;";
+            } else {
+                if (param.type === "integer") param.type = "number";
+                paramsDef += " " + param.name.toCamelCase() + ": " + (param.type || interfacePrefix + param.schema.toPascalCase()) + ";";
+            }
         }
         paramsDef += " }";
         return paramsDef;
@@ -548,7 +558,11 @@ var TsControllerGenerator = function () {
             fetchRequest.headers = {};
             for (var _f = 0, _g = apiMethod.headerParams; _f < _g.length; _f++) {
                 var headerParam = _g[_f];
-                fetchRequest.headers[headerParam.name] = "params." + headerParam.name.toCamelCase();
+                if (headerParam.name === "Basic Authentication") {
+                    fetchRequest.headers["Authorization"] = "\"Basic\" + btoa(params.username + \":\" + params.password)";
+                } else {
+                    fetchRequest.headers[headerParam.name] = "params." + headerParam.name.toCamelCase();
+                }
             }
         }
         if (apiMethod.httpMethod) {
@@ -593,7 +607,7 @@ exports.TsControllerGenerator = TsControllerGenerator;
 
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Code = function () {
+var Code = /** @class */function () {
     function Code(firstLine) {
         this.code = firstLine;
         this.children = [];
@@ -639,7 +653,6 @@ exports.Code = Code;
 
 var EventEmitter = __webpack_require__(13).EventEmitter;
 var spawn = __webpack_require__(14).spawn;
-var readlink = __webpack_require__(15).readlinkSync;
 var path = __webpack_require__(1);
 var dirname = path.dirname;
 var basename = path.basename;
@@ -693,6 +706,18 @@ Option.prototype.name = function() {
   return this.long
     .replace('--', '')
     .replace('no-', '');
+};
+
+/**
+ * Return option name, in a camelcase format that can be used
+ * as a object attribute key.
+ *
+ * @return {String}
+ * @api private
+ */
+
+Option.prototype.attributeName = function() {
+  return camelcase( this.name() );
 };
 
 /**
@@ -791,6 +816,10 @@ Command.prototype.__proto__ = EventEmitter.prototype;
  */
 
 Command.prototype.command = function(name, desc, opts) {
+  if(typeof desc === 'object' && desc !== null){
+    opts = desc;
+    desc = null;
+  }
   opts = opts || {};
   var args = name.split(/ +/);
   var cmd = new Command(args.shift());
@@ -801,7 +830,6 @@ Command.prototype.command = function(name, desc, opts) {
     this._execs[cmd._name] = true;
     if (opts.isDefault) this.defaultExecutable = cmd._name;
   }
-
   cmd._noHelp = !!opts.noHelp;
   this.commands.push(cmd);
   cmd.parseExpectedArgs(args);
@@ -937,8 +965,8 @@ Command.prototype.action = function(fn) {
   };
   var parent = this.parent || this;
   var name = parent === this ? '*' : this._name;
-  parent.on(name, listener);
-  if (this._alias) parent.on(this._alias, listener);
+  parent.on('command:' + name, listener);
+  if (this._alias) parent.on('command:' + this._alias, listener);
   return this;
 };
 
@@ -985,8 +1013,8 @@ Command.prototype.action = function(fn) {
  *
  * @param {String} flags
  * @param {String} description
- * @param {Function|Mixed} fn or default
- * @param {Mixed} defaultValue
+ * @param {Function|*} [fn] or default
+ * @param {*} [defaultValue]
  * @return {Command} for chaining
  * @api public
  */
@@ -995,7 +1023,7 @@ Command.prototype.option = function(flags, description, fn, defaultValue) {
   var self = this
     , option = new Option(flags, description)
     , oname = option.name()
-    , name = camelcase(oname);
+    , name = option.attributeName();
 
   // default as 3rd arg
   if (typeof fn != 'function') {
@@ -1017,7 +1045,10 @@ Command.prototype.option = function(flags, description, fn, defaultValue) {
     // when --no-* we make sure default is true
     if (false == option.bool) defaultValue = true;
     // preassign only if we have a default
-    if (undefined !== defaultValue) self[name] = defaultValue;
+    if (undefined !== defaultValue) {
+      self[name] = defaultValue;
+      option.defaultValue = defaultValue;
+    }
   }
 
   // register the option
@@ -1025,7 +1056,7 @@ Command.prototype.option = function(flags, description, fn, defaultValue) {
 
   // when it's passed assign the value
   // and conditionally invoke the callback
-  this.on(oname, function(val) {
+  this.on('option:' + oname, function(val) {
     // coercion
     if (null !== val && fn) val = fn(val, undefined === self[name]
       ? defaultValue
@@ -1094,11 +1125,24 @@ Command.prototype.parse = function(argv) {
 
   // executable sub-commands
   var name = result.args[0];
+
+  var aliasCommand = null;
+  // check alias of sub commands
+  if (name) {
+    aliasCommand = this.commands.filter(function(command) {
+      return command.alias() === name;
+    })[0];
+  }
+
   if (this._execs[name] && typeof this._execs[name] != "function") {
+    return this.executeSubCommand(argv, args, parsed.unknown);
+  } else if (aliasCommand) {
+    // is alias of a subCommand
+    args[0] = aliasCommand._name;
     return this.executeSubCommand(argv, args, parsed.unknown);
   } else if (this.defaultExecutable) {
     // use the default subcommand
-    args.unshift(name = this.defaultExecutable);
+    args.unshift(this.defaultExecutable);
     return this.executeSubCommand(argv, args, parsed.unknown);
   }
 
@@ -1135,7 +1179,7 @@ Command.prototype.executeSubCommand = function(argv, args, unknown) {
   // In case of globally installed, get the base dir where executable
   //  subcommand file should be located at
   var baseDir
-    , link = readlink(f);
+    , link = fs.lstatSync(f).isSymbolicLink() ? fs.readlinkSync(f) : f;
 
   // when symbolink is relative path
   if (link !== f && link.charAt(0) !== '/') {
@@ -1160,19 +1204,27 @@ Command.prototype.executeSubCommand = function(argv, args, unknown) {
   var proc;
   if (process.platform !== 'win32') {
     if (isExplicitJS) {
-      args.unshift(localBin);
+      args.unshift(bin);
       // add executable arguments to spawn
       args = (process.execArgv || []).concat(args);
 
-      proc = spawn('node', args, { stdio: 'inherit', customFds: [0, 1, 2] });
+      proc = spawn(process.argv[0], args, { stdio: 'inherit', customFds: [0, 1, 2] });
     } else {
       proc = spawn(bin, args, { stdio: 'inherit', customFds: [0, 1, 2] });
     }
   } else {
-    args.unshift(localBin);
+    args.unshift(bin);
     proc = spawn(process.execPath, args, { stdio: 'inherit'});
   }
 
+  var signals = ['SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGINT', 'SIGHUP'];
+  signals.forEach(function(signal) {
+    process.on(signal, function(){
+      if ((proc.killed === false) && (proc.exitCode === null)){
+        proc.kill(signal);
+      }
+    });
+  });
   proc.on('close', process.exit.bind(process));
   proc.on('error', function(err) {
     if (err.code == "ENOENT") {
@@ -1246,10 +1298,10 @@ Command.prototype.parseArgs = function(args, unknown) {
 
   if (args.length) {
     name = args[0];
-    if (this.listeners(name).length) {
-      this.emit(args.shift(), args, unknown);
+    if (this.listeners('command:' + name).length) {
+      this.emit('command:' + args.shift(), args, unknown);
     } else {
-      this.emit('*', args);
+      this.emit('command:*', args);
     }
   } else {
     outputHelpIfNecessary(this, unknown);
@@ -1303,13 +1355,13 @@ Command.prototype.parseOptions = function(argv) {
     arg = argv[i];
 
     // literal args after --
-    if ('--' == arg) {
-      literal = true;
+    if (literal) {
+      args.push(arg);
       continue;
     }
 
-    if (literal) {
-      args.push(arg);
+    if ('--' == arg) {
+      literal = true;
       continue;
     }
 
@@ -1322,7 +1374,7 @@ Command.prototype.parseOptions = function(argv) {
       if (option.required) {
         arg = argv[++i];
         if (null == arg) return this.optionMissingArgument(option);
-        this.emit(option.name(), arg);
+        this.emit('option:' + option.name(), arg);
       // optional arg
       } else if (option.optional) {
         arg = argv[i+1];
@@ -1331,10 +1383,10 @@ Command.prototype.parseOptions = function(argv) {
         } else {
           ++i;
         }
-        this.emit(option.name(), arg);
+        this.emit('option:' + option.name(), arg);
       // bool
       } else {
-        this.emit(option.name());
+        this.emit('option:' + option.name());
       }
       continue;
     }
@@ -1370,7 +1422,7 @@ Command.prototype.opts = function() {
     , len = this.options.length;
 
   for (var i = 0 ; i < len; i++) {
-    var key = camelcase(this.options[i].name());
+    var key = this.options[i].attributeName();
     result[key] = key === 'version' ? this._version : this[key];
   }
   return result;
@@ -1445,7 +1497,7 @@ Command.prototype.variadicArgNotLast = function(name) {
  * which will print the version number when passed.
  *
  * @param {String} str
- * @param {String} flags
+ * @param {String} [flags]
  * @return {Command} for chaining
  * @api public
  */
@@ -1455,7 +1507,7 @@ Command.prototype.version = function(str, flags) {
   this._version = str;
   flags = flags || '-V, --version';
   this.option(flags, 'output the version number');
-  this.on('version', function() {
+  this.on('option:version', function() {
     process.stdout.write(str + '\n');
     process.exit(0);
   });
@@ -1485,8 +1537,16 @@ Command.prototype.description = function(str) {
  */
 
 Command.prototype.alias = function(alias) {
-  if (0 == arguments.length) return this._alias;
-  this._alias = alias;
+  var command = this;
+  if(this.commands.length !== 0) {
+    command = this.commands[this.commands.length - 1]
+  }
+
+  if (arguments.length === 0) return command._alias;
+
+  if (alias === command._name) throw new Error('Command alias can\'t be the same as its name');
+
+  command._alias = alias;
   return this;
 };
 
@@ -1514,15 +1574,17 @@ Command.prototype.usage = function(str) {
 };
 
 /**
- * Get the name of the command
+ * Get or set the name of the command
  *
- * @param {String} name
+ * @param {String} str
  * @return {String|Command}
  * @api public
  */
 
-Command.prototype.name = function() {
-  return this._name;
+Command.prototype.name = function(str) {
+  if (0 === arguments.length) return this._name;
+  this._name = str;
+  return this;
 };
 
 /**
@@ -1548,12 +1610,12 @@ Command.prototype.largestOptionLength = function() {
 Command.prototype.optionHelp = function() {
   var width = this.largestOptionLength();
 
-  // Prepend the help information
-  return [pad('-h, --help', width) + '  ' + 'output usage information']
-      .concat(this.options.map(function(option) {
-        return pad(option.flags, width) + '  ' + option.description;
-      }))
-      .join('\n');
+  // Append the help information
+  return this.options.map(function(option) {
+      return pad(option.flags, width) + '  ' + option.description
+        + (option.defaultValue !== undefined ? ' (default: ' + option.defaultValue + ')' : '');
+  }).concat([pad('-h, --help', width) + '  ' + 'output usage information'])
+    .join('\n');
 };
 
 /**
@@ -1578,7 +1640,7 @@ Command.prototype.commandHelp = function() {
         + (cmd._alias ? '|' + cmd._alias : '')
         + (cmd.options.length ? ' [options]' : '')
         + ' ' + args
-      , cmd.description()
+      , cmd._description
     ];
   });
 
@@ -1629,17 +1691,17 @@ Command.prototype.helpInformation = function() {
   if (commandHelp) cmds = [commandHelp];
 
   var options = [
-    '  Options:'
+    ''
+    , '  Options:'
     , ''
     , '' + this.optionHelp().replace(/^/gm, '    ')
-    , ''
     , ''
   ];
 
   return usage
-    .concat(cmds)
     .concat(desc)
     .concat(options)
+    .concat(cmds)
     .join('\n');
 };
 
@@ -1756,24 +1818,6 @@ module.exports = require("events");
 /***/ (function(module, exports) {
 
 module.exports = require("child_process");
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var fs = __webpack_require__(0)
-  , lstat = fs.lstatSync;
-
-exports.readlinkSync = function (p) {
-  if (lstat(p).isSymbolicLink()) {
-    return fs.readlinkSync(p);
-  } else {
-    return p;
-  }
-};
-
-
-
 
 /***/ })
 /******/ ]);
