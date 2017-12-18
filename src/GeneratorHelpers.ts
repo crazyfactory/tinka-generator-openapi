@@ -64,9 +64,12 @@ export class GeneratorHelpers {
           throw new Error(`This api method ${method.name} does not define response for success status`);
         }
 
+        method.httpMethod = this.cleanHttpMethod(httpMethod);
+        method.allParams = paths[url][httpMethod].parameters;
+
         if (paths[url][httpMethod].security && paths[url][httpMethod].security.length && paths[url][httpMethod].security[0].basic) {
-          paths[url][httpMethod].parameters = [
-            ...paths[url][httpMethod].parameters,
+          method.allParams = [
+            ...method.allParams,
             {
               name: "Basic Authentication",
               in: "header"
@@ -74,10 +77,7 @@ export class GeneratorHelpers {
           ]
         }
 
-        method.httpMethod = this.cleanHttpMethod(httpMethod);
-        method.allParams = paths[url][httpMethod].parameters;
-
-        for (let parameter of paths[url][httpMethod].parameters) {
+        for (let parameter of method.allParams) {
           if (parameter.schema && parameter.schema["$ref"]) {
             const ref = parameter.schema["$ref"];
             parameter.schema = ref.substr(ref.lastIndexOf("/") + 1);
