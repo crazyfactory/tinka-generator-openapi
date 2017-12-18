@@ -2,6 +2,7 @@ require("./StringHelpers");
 import {GeneratorHelpers} from "./GeneratorHelpers";
 import {expect} from 'chai';
 import {IPathsData, IApiController, IApiMethod, HttpMethod} from "./interfaces";
+import {SpecialParams} from "./SpecialParams";
 
 describe("GeneratorHelpers", () => {
   const paths: IPathsData = {
@@ -873,7 +874,7 @@ describe("GeneratorHelpers", () => {
     it("returns correct method's allParams", () => {
       // Basic Auth
       expect(methods[0].allParams).to.deep.equal([{
-        name: "Basic Authentication",
+        name: SpecialParams.BASIC_AUTH,
         in: "header"
       }]);
 
@@ -917,7 +918,7 @@ describe("GeneratorHelpers", () => {
     it("returns correct method's headerParams", () => {
       // Basic Auth
       expect(methods[0].headerParams).to.deep.equal([{
-        name: "Basic Authentication",
+        name: SpecialParams.BASIC_AUTH,
         in: "header"
       }]);
       expect(methods[1].headerParams).to.deep.equal([{

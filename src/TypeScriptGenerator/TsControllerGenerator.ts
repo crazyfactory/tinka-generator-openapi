@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {HttpMethod, IApiController, IApiMethod, ICode, IGenerator, IParams} from "../interfaces";
 import {Code} from "../Code";
+import {SpecialParams} from "../SpecialParams";
 import {TypeScriptGenerator} from "./TypeScriptGenerator";
 
 export class TsControllerGenerator implements IGenerator {
@@ -66,7 +67,7 @@ export class TsControllerGenerator implements IGenerator {
   public static getParamsDefinition(params: IParams[], interfacePrefix: string = "I"): string {
     let paramsDef: string = "{";
     for (let param of params) {
-      if (param.name === "Basic Authentication") {
+      if (param.name === SpecialParams.BASIC_AUTH) {
         paramsDef += ` username: string; password: string;`;
       } else {
         if (param.type === "integer") param.type = "number";
@@ -105,8 +106,8 @@ export class TsControllerGenerator implements IGenerator {
     if (apiMethod.headerParams.length) {
       fetchRequest.headers = {};
       for (let headerParam of apiMethod.headerParams) {
-        if (headerParam.name === "Basic Authentication") {
-          fetchRequest.headers["Authorization"] = `"Basic" + btoa(params.username + ":" + params.password)`;
+        if (headerParam.name === SpecialParams.BASIC_AUTH) {
+          fetchRequest.headers["Authorization"] = `"Basic " + btoa(params.username + ":" + params.password)`;
         } else {
           fetchRequest.headers[headerParam.name] = `params.${headerParam.name.toCamelCase()}`;
         }

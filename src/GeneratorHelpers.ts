@@ -1,5 +1,6 @@
 import {HttpMethod, IApiMethod, IApiController, IPathsData} from "./interfaces";
 import {ApiMethod} from "./models/ApiMethod";
+import {SpecialParams} from "./SpecialParams";
 
 export class GeneratorHelpers {
   public static getApiControllers(emptyApiControllers: IApiController[], apiMethods: IApiMethod[]): IApiController[] {
@@ -71,7 +72,7 @@ export class GeneratorHelpers {
           method.allParams = [
             ...method.allParams,
             {
-              name: "Basic Authentication",
+              name: SpecialParams.BASIC_AUTH,
               in: "header"
             }
           ]

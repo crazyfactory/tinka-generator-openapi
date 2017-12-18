@@ -1,5 +1,6 @@
 require("../StringHelpers");
 import {expect} from "chai";
+import {SpecialParams} from "../SpecialParams";
 import {TsControllerGenerator} from "./TsControllerGenerator";
 import {HttpMethod, IApiMethod, ICode, IParams, IApiController} from "../interfaces";
 import {ApiMethod} from "../models/ApiMethod";
@@ -306,7 +307,7 @@ describe("TsControllerGenerator", () => {
           "required": true
         },
         {
-          "name": "Basic Authentication",
+          "name": SpecialParams.BASIC_AUTH,
           "in": "header",
         },
         {
@@ -421,11 +422,11 @@ describe("TsControllerGenerator", () => {
       const apiMethod: IApiMethod = new ApiMethod();
       apiMethod.headerParams = [
         {
-          "name": "Basic Authentication",
+          "name": SpecialParams.BASIC_AUTH,
           "in": "header"
         }
       ];
-      expect(gen.getFetchRequestString(apiMethod)).to.equal(`{ headers: { "Authorization": "Basic" + btoa(params.username + ":" + params.password) } }`);
+      expect(gen.getFetchRequestString(apiMethod)).to.equal(`{ headers: { "Authorization": "Basic " + btoa(params.username + ":" + params.password) } }`);
     });
 
     it("returns correct httpMethod", () => {
