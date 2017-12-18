@@ -8,7 +8,7 @@
     "format": "tsfmt -r ./sdk/TypeScript/src/sdk.ts",
     "generate:typescript": "ts-node src/index.ts --lang=typescript",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
-    "test": "nyc mocha --compilers ts:ts-node/register src/**/*.test.ts"
+    "test": "nyc mocha --compilers ts:ts-node/register \"src/**/*.test.ts\""
   },
   "nyc": {
     "include": [
