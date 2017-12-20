@@ -1,5 +1,6 @@
 import {HttpMethod, IApiMethod, IApiController, IPathsData} from "./interfaces";
 import {ApiMethod} from "./models/ApiMethod";
+import {SpecialParams} from "./SpecialParams";
 
 export class GeneratorHelpers {
   public static getApiControllers(emptyApiControllers: IApiController[], apiMethods: IApiMethod[]): IApiController[] {
@@ -67,7 +68,17 @@ export class GeneratorHelpers {
         method.httpMethod = this.cleanHttpMethod(httpMethod);
         method.allParams = paths[url][httpMethod].parameters;
 
-        for (let parameter of paths[url][httpMethod].parameters) {
+        if (paths[url][httpMethod].security && paths[url][httpMethod].security.length && paths[url][httpMethod].security[0].basic) {
+          method.allParams = [
+            ...method.allParams,
+            {
+              name: SpecialParams.BASIC_AUTH,
+              in: "header"
+            }
+          ]
+        }
+
+        for (let parameter of method.allParams) {
           if (parameter.schema && parameter.schema["$ref"]) {
             const ref = parameter.schema["$ref"];
             parameter.schema = ref.substr(ref.lastIndexOf("/") + 1);

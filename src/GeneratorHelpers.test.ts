@@ -2,6 +2,7 @@ require("./StringHelpers");
 import {GeneratorHelpers} from "./GeneratorHelpers";
 import {expect} from 'chai';
 import {IPathsData, IApiController, IApiMethod, HttpMethod} from "./interfaces";
+import {SpecialParams} from "./SpecialParams";
 
 describe("GeneratorHelpers", () => {
   const paths: IPathsData = {
@@ -871,7 +872,12 @@ describe("GeneratorHelpers", () => {
       expect(methods[11].httpMethod).to.equal(HttpMethod.DELETE);
     });
     it("returns correct method's allParams", () => {
-      expect(methods[0].allParams.length).to.equal(0);
+      // Basic Auth
+      expect(methods[0].allParams).to.deep.equal([{
+        name: SpecialParams.BASIC_AUTH,
+        in: "header"
+      }]);
+
       expect(methods[10].allParams).to.deep.equal([
         {
           "name": "id",
@@ -910,7 +916,11 @@ describe("GeneratorHelpers", () => {
       }]);
     });
     it("returns correct method's headerParams", () => {
-      expect(methods[2].headerParams.length).to.equal(0);
+      // Basic Auth
+      expect(methods[0].headerParams).to.deep.equal([{
+        name: SpecialParams.BASIC_AUTH,
+        in: "header"
+      }]);
       expect(methods[1].headerParams).to.deep.equal([{
         name: "Authorization",
         in: "header",
@@ -918,6 +928,7 @@ describe("GeneratorHelpers", () => {
         description: "Refresh token",
         required: true
       }]);
+      expect(methods[2].headerParams.length).to.equal(0);
     });
     it("throws missing response", () => {
       const localPaths: IPathsData = {
