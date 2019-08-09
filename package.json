@@ -53,6 +53,6 @@
     "webpack": "^3.0.0"
   },
   "dependencies": {
-    "commander": "^2.9.0"
+    "commander": "^3.0.0"
   }
 }
